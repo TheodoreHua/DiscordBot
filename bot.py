@@ -1,0 +1,103 @@
+import logging
+
+from difflib import SequenceMatcher
+from os import environ, getenv
+from pathlib import Path
+from traceback import format_tb
+
+import nextcord
+from nextcord.ext import commands
+from dotenv import load_dotenv
+
+from cogs import cogs
+from helpers import *
+
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
+
+assert_data()
+bot_config, user_config = BotConfig(), UserConfig()
+server_config = ServerConfig(bot_config)
+intents = nextcord.Intents.all()
+client = commands.Bot(command_prefix=server_config.get_prefix, guild_subscriptions=True, intents=intents,
+                      owner_id=bot_config["owner_id"], description=bot_config["description"])
+
+for cog in cogs:
+    client.add_cog(cog(client, bot_config, server_config, user_config))
+    logging.info("Initialized cog " + cog.__name__)
+
+
+@client.event
+async def on_ready():
+    user_config.check_values()
+    server_config.check_servers(client.guilds)
+    await client.change_presence(status=nextcord.Status.online, activity=nextcord.Game(bot_config["status"]))
+    print("Bot has been initiated")
+
+
+@client.event
+async def on_guild_join(guild):
+    server_config.add_guild(guild)
+    logging.info("Processed guild {} ({})".format(guild.name, guild.id))
+
+
+@client.event
+async def on_guild_remove(guild):
+    server_config.remove_guild(guild)
+    logging.info("Removed"
+                 " guild {} ({})".format(guild.name, guild.id))
+
+
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("**Missing Required Argument**: {}.".format(error.param.name))
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send("**Bad Argument**: Check the documentation on how to use this command")
+    elif isinstance(error, commands.CommandNotFound):
+        def similar(a, b):
+            return SequenceMatcher(None, a, b).ratio()
+
+        command = ctx.message.content.split(" ")[0]
+        command_similarities = {}
+        for cmd in client.commands:
+            command_similarities[similar(command, cmd.name)] = cmd.name
+
+        highest_command = max([*command_similarities]), command_similarities[max([*command_similarities])]
+        if len(command_similarities) == 0 or highest_command[0] < 0.55:
+            await ctx.send("**Command Not Found**: Run {}help for a list of commands.".format(ctx.prefix))
+        else:
+            await ctx.send("**Command Not Found**: Did you mean `{}`?".format(highest_command[1]))
+    elif isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(
+            "This command is on cooldown, try again in **{}** seconds".format(str(error.retry_after)),
+            embed=nextcord.Embed(description=repr(error)))
+    elif isinstance(error, commands.MissingPermissions):
+        await ctx.send("**Missing Permissions**: You need `{}`."
+                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_perms)),
+                       embed=nextcord.Embed(description=repr(error)))
+    elif isinstance(error, commands.BotMissingPermissions):
+        await ctx.send("**Bot Missing Permissions*: {}, please add the permissions to the bot."
+                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_perms)),
+                       embed=nextcord.Embed(description=repr(error)))
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send("**Not Owner**: Only the owner of the bot can execute this command")
+    elif isinstance(error, commands.CheckFailure):
+        await ctx.send("**Check Failure**: A check required to run this command has failed, most likely meaning you "
+                       "don't have permissions.")
+    else:
+        logging.error(
+            "Error occurred attempting to execute '{}' by user {}\n{}\n{}".format(
+                ctx.invoked_with, ctx.author.id, repr(error), "\n".join(format_tb(error.__traceback__))))
+        await ctx.send(embed=nextcord.Embed(
+            description=":x: An internal exception occurred while running this command.", colour=nextcord.Colour.red()))
+
+
+if __name__ == "__main__":
+    if "BOT_TOKEN" not in environ:
+        load_dotenv()
+    BOT_TOKEN = getenv("BOT_TOKEN")
+    if BOT_TOKEN is None:
+        logging.fatal("BOT_TOKEN could not be loaded from system environment variables or .env file")
+        exit()
+
+    client.run(BOT_TOKEN)
