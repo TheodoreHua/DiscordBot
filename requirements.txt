@@ -1,6 +1,7 @@
-nextcord~=2.0.0a2
+nextcord[voice]~=2.0.0a2
 python-dotenv~=0.14.0
 discord-typed-flags~=1.1.4
 pyparsing~=2.4.7
 requests~=2.26.0
 minesweeperPy~=1.8
+youtube-dl~=2021.6.6
