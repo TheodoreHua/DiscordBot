@@ -120,7 +120,7 @@ class Music(commands.Cog):
         self.q = {}
 
     def get_player(self, ctx):
-        """Retrieve the guild player, or generate tone"""
+        """Retrieve the guild player, or generate one"""
         try:
             player = self.q[ctx.guild.id]
         except KeyError:
@@ -211,10 +211,13 @@ class Music(commands.Cog):
         await ctx.message.reply("**Resumed**")
 
     @commands.command(brief="Leave the VC", aliases=["stop"])
-    async def leave(self, ctx):
+    async def leave(self, ctx: commands.Context):
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
+        elif ctx.author.voice is None or ctx.guild.get_member(
+                ctx.bot.user.id).voice.channel != ctx.author.voice.channel:
+            return await ctx.send("You must be connected to the bot's VC")
 
         oc = ctx.author.voice.channel.name
         await self.cleanup(ctx.guild)
@@ -330,4 +333,3 @@ class Music(commands.Cog):
 # TODO: Queue command
 # TODO: Voting system for skip
 # TODO: Make some commands admin only
-# TODO: Make leave only for people in the VC
