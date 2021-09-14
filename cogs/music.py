@@ -1,5 +1,6 @@
 import asyncio
 import random
+from datetime import timedelta
 
 import nextcord
 import youtube_dl
@@ -66,6 +67,7 @@ class Player:
                     async with timeout(300):
                         data = await self.queue.get()
                 except asyncio.TimeoutError:
+                    await self.text_channel.send("Disconnected after being inactive for 5 minutes")
                     return self.destroy(self.guild)
             else:
                 data = self.force_play
@@ -82,6 +84,7 @@ class Player:
             s.cleanup()
             self.current_song = None
             if len(self.ctx.guild.get_member(self.client.user.id).voice.channel.members) < 2:
+                await self.text_channel.send("Disconnected due to the VC being empty")
                 return self.destroy(self.guild)
 
     def get_current_song(self):
@@ -128,14 +131,14 @@ class Music(commands.Cog):
     async def handle_join(self, ctx: commands.Context):
         if ctx.voice_client is None:
             if ctx.author.voice is None:
-                await ctx.send("You are not in a voice channel")
+                await ctx.message.reply("You are not in a voice channel")
                 return
             return await ctx.author.voice.channel.connect()
         else:
             if ctx.author.voice.channel == ctx.guild.get_member(self.client.user.id).voice.channel:
                 return True
             else:
-                await ctx.send("The bot is currently in another Voice Channel")
+                await ctx.message.reply("The bot is currently in another Voice Channel")
                 return
 
     async def cleanup(self, guild):
@@ -165,24 +168,25 @@ class Music(commands.Cog):
             await ctx.send("**Searching `{}`**".format(url))
             p = await self.get_data(url)
         except YTDLError:
-            await ctx.send(":x: " + str(YTDLError))
+            await ctx.message.reply(":x: " + str(YTDLError))
             return
         player = self.get_player(ctx)
         if 'url' in p and 'ytsearch' in p["url"]:
-            return await ctx.send(":x: Searching is not currently supported")
+            return await ctx.message.reply(":x: Searching is not currently supported")
         elif 'entries' in p:
             c = 0
             for i in p['entries']:
                 await player.queue.put(i)
                 c += 1
-            em = nextcord.Embed(description="**{}**".format(p['title']), colour=self.bot_config["embed_colour"])
+            em = nextcord.Embed(description="[{}]({})".format(p['title'], p['webpage_url']),
+                                colour=self.bot_config["embed_colour"])
             em.set_author(icon_url=ctx.author.avatar.url, name="Playlist added to queue")
             em.add_field(name="Playlist Author", value=p['uploader'])
             em.add_field(name="Enqueued", value="`{:,}` songs".format(c))
-            await ctx.send(embed=em)
+            await ctx.message.reply(embed=em)
         else:
             await player.queue.put(p)
-            await ctx.send("**Added** `{}` **to queue**".format(p['title']))
+            await ctx.message.reply("**Added** `{}` **to queue**".format(p['title']))
 
     @commands.command(brief="Pause the current song")
     async def pause(self, ctx):
@@ -193,9 +197,9 @@ class Music(commands.Cog):
             return await ctx.send("The player is already paused")
 
         vc.pause()
-        await ctx.send("**Paused**")
+        await ctx.message.reply("**Paused**")
 
-    @commands.command(brief="Resume the currently paused song")
+    @commands.command(brief="Resume the currently paused song", aliases=['unpause'])
     async def resume(self, ctx):
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
@@ -204,7 +208,7 @@ class Music(commands.Cog):
             return await ctx.send("The player is not paused")
 
         vc.resume()
-        await ctx.send("**Resumed**")
+        await ctx.message.reply("**Resumed**")
 
     @commands.command(brief="Leave the VC", aliases=["stop"])
     async def leave(self, ctx):
@@ -212,7 +216,9 @@ class Music(commands.Cog):
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
 
+        oc = ctx.author.voice.channel.name
         await self.cleanup(ctx.guild)
+        await ctx.message.reply("Left `{}`".format(oc))
 
     @commands.command(brief="Set the volume", help="Set the volume of the music player, may take a couple seconds to "
                                                    "take effect. Don't provide a parameter to reset to default.")
@@ -221,13 +227,13 @@ class Music(commands.Cog):
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
         if not 0 < volume < 101:
-            return await ctx.send("Please enter a value between 1 and 100")
+            return await ctx.message.reply("Please enter a value between 1 and 100")
 
         player = self.get_player(ctx)
         if vc.source:
             vc.source.volume = volume / 100
         player.volume = volume / 100
-        await ctx.send("**Set the volume to ** `{}%`".format(volume))
+        await ctx.message.reply("**Set the volume to ** `{}%`".format(volume))
 
     @commands.command(brief="Shuffle the queue")
     async def shuffle(self, ctx):
@@ -239,7 +245,7 @@ class Music(commands.Cog):
             return await ctx.send("Cannot shuffle an empty queue")
         else:
             player.shuffle()
-            await ctx.send("*Queue Shuffled*")
+            await ctx.message.reply("**Queue Shuffled**")
 
     @commands.command(brief="Clear the queue")
     async def clear(self, ctx):
@@ -251,7 +257,7 @@ class Music(commands.Cog):
             return await ctx.send("The queue is already empty")
         else:
             player.clear()
-            await ctx.send("**Queue Cleared** command")
+            await ctx.message.reply("**Queue Cleared** command")
 
     @commands.command(brief="Skip the song")
     async def skip(self, ctx):
@@ -264,7 +270,7 @@ class Music(commands.Cog):
             return await ctx.send("The player is not currently playing anything")
 
         vc.stop()
-        await ctx.send("**Skipped!**")
+        await ctx.message.reply("**Skipped!**")
 
     @commands.command(brief="Play a song immediately", help="Skip the current song play this instead", aliases=['ps'])
     async def playskip(self, ctx, *, url):
@@ -275,20 +281,20 @@ class Music(commands.Cog):
             await ctx.send("**Searching `{}`**".format(url))
             p = await self.get_data(url)
         except YTDLError:
-            await ctx.send(":x: " + str(YTDLError))
+            await ctx.message.reply(":x: " + str(YTDLError))
             return
         player = self.get_player(ctx)
         if 'url' in p and 'ytsearch' in p["url"]:
-            return await ctx.send(":x: Searching is not currently supported")
+            return await ctx.message.reply(":x: Searching is not currently supported")
         elif 'entries' in p:
-            return await ctx.send(":x: Playlists are not allowed for playskip")
+            return await ctx.message.reply(":x: Playlists are not allowed for playskip")
         else:
             if player.empty():
                 await player.queue.put(p)
             else:
                 player.force_play = p
                 vc.stop()
-            await ctx.send("**Skipped current song to play** `{}` **instead**".format(p['title']))
+            await ctx.message.reply("**Skipped current song to play** `{}` **instead**".format(p['title']))
 
     @commands.command(brief="Rickroll yourself", help="You found an easter egg! Skip the current song and play a "
                                                       "rickroll next instead.", hidden=True)
@@ -305,7 +311,22 @@ class Music(commands.Cog):
             player.force_play = d
             vc.stop()
 
-# TODO: Now Playing command
+    @commands.command(brief="See information about the current song", aliases=['np', 'current'])
+    async def nowplaying(self, ctx):
+        vc = ctx.voice_client
+        if not vc or not vc.is_connected():
+            return await ctx.send("I'm not connected to a VC")
+        player = self.get_player(ctx)
+        if player.current_song is None:
+            return await ctx.send("I'm not currently playing anything")
+        s = player.current_song
+        em = nextcord.Embed(description="[{}]({})".format(s.title, s.url), colour=self.bot_config["embed_colour"])
+        em.set_author(icon_url=self.client.user.display_avatar.url, name="Now Playing")
+        em.set_thumbnail(url=s.thumbnail)
+        em.add_field(name="Duration", value=str(timedelta(seconds=s.duration)))
+
+        await ctx.message.reply(embed=em)
+
 # TODO: Queue command
 # TODO: Voting system for skip
 # TODO: Make some commands admin only

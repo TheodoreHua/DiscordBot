@@ -2,7 +2,6 @@ import logging
 
 from difflib import SequenceMatcher
 from os import environ, getenv
-from pathlib import Path
 from traceback import format_tb
 
 import nextcord
@@ -18,8 +17,10 @@ assert_data()
 bot_config, user_config = BotConfig(), UserConfig()
 server_config = ServerConfig(bot_config)
 intents = nextcord.Intents.all()
+allowed_mentions = nextcord.AllowedMentions(everyone=False, replied_user=False)
 client = commands.Bot(command_prefix=server_config.get_prefix, guild_subscriptions=True, intents=intents,
-                      owner_id=bot_config["owner_id"], description=bot_config["description"])
+                      owner_id=bot_config["owner_id"], description=bot_config["description"],
+                      allowed_mentions=allowed_mentions)
 
 for cog in cogs:
     client.add_cog(cog(client, bot_config, server_config, user_config))
@@ -73,11 +74,11 @@ async def on_command_error(ctx, error):
             embed=nextcord.Embed(description=repr(error)))
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("**Missing Permissions**: You need `{}`."
-                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_perms)),
+                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)),
                        embed=nextcord.Embed(description=repr(error)))
     elif isinstance(error, commands.BotMissingPermissions):
         await ctx.send("**Bot Missing Permissions*: {}, please add the permissions to the bot."
-                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_perms)),
+                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)),
                        embed=nextcord.Embed(description=repr(error)))
     elif isinstance(error, commands.NotOwner):
         await ctx.send("**Not Owner**: Only the owner of the bot can execute this command")
