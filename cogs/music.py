@@ -89,7 +89,7 @@ class Player:
             s.cleanup()
             self.current_song = None
             self.skips = 0
-            if len(self.ctx.guild.get_member(self.client.user.id).voice.channel.members) < 2:
+            if len([i for i in self.ctx.guild.get_member(self.client.user.id).voice.channel.members if not i.bot]) == 0:
                 await self.text_channel.send("Disconnected due to the VC being empty")
                 return self.destroy(self.guild)
 
