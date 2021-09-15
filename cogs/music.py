@@ -1,11 +1,14 @@
 import asyncio
 import random
 from datetime import timedelta
+from math import ceil
 
 import nextcord
 import youtube_dl
 from async_timeout import timeout
 from nextcord.ext import commands
+
+from helpers.views import MusicQueuePager
 
 ytdl = youtube_dl.YoutubeDL({'format': 'bestaudio/best', 'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
                              'restrictfilenames': True, 'noplaylist': True, 'nocheckcertificate': True,
@@ -25,7 +28,7 @@ class YTDLSource(nextcord.PCMVolumeTransformer):
 
         self.title = data.get('title')
         self.thumbnail = data.get('thumbnail')
-        self.duration = data.get('duration')  # Should be in seconds, need to check
+        self.duration = data.get('duration')
         self.url = data.get('webpage_url')
         self.stream_url = data.get('url')
 
@@ -48,6 +51,7 @@ class Player:
         self.next = asyncio.Event()
         self.current_song = None
         self.force_play = None
+        self.playing = True
         self.volume = 0.5
 
         ctx.bot.loop.create_task(self.player_loop())
@@ -59,7 +63,7 @@ class Player:
         """Loop that actually plays the songs"""
         await self.client.wait_until_ready()
 
-        while not self.client.is_closed():
+        while not self.client.is_closed() and self.playing:
             self.next.clear()
 
             if self.force_play is None:
@@ -74,7 +78,7 @@ class Player:
                 self.force_play = None
 
             data = await asyncio.get_event_loop().run_in_executor(None, lambda: ytdl.extract_info(
-                data.get('webpage_url', None) or data.get('url'), download=False))
+                data.get('webpage_url') or data.get('url'), download=False))
             s = YTDLSource.create_source_from_data(self.text_channel, data, self.volume)
             self.current_song = s
 
@@ -106,6 +110,16 @@ class Player:
         for _ in range(self.queue.qsize()):
             self.queue.get_nowait()
             self.queue.task_done()
+
+    def get_total_duration(self):
+        """Get the total duration of the queue"""
+        d = self.current_song.duration if self.current_song is not None else 0
+        # noinspection PyProtectedMember
+        # noinspection PyUnresolvedReferences
+        for s in list(self.queue._queue):
+            d += s.get('duration')
+
+        return d
 
     def destroy(self, guild):
         return self.client.loop.create_task(self._cog.cleanup(guild))
@@ -142,6 +156,8 @@ class Music(commands.Cog):
                 return
 
     async def cleanup(self, guild):
+        player = self.q[guild.id]
+        player.playing = False
         try:
             await guild.voice_client.disconnect()
         except AttributeError:
@@ -303,9 +319,9 @@ class Music(commands.Cog):
                                                       "rickroll next instead.", hidden=True)
     async def rickroll(self, ctx):
         await ctx.message.delete()
+        if await self.handle_join(ctx) is None:
+            return
         vc = ctx.voice_client
-        if not vc or not vc.is_connected():
-            return await ctx.send("I'm not connected to a VC")
         player = self.get_player(ctx)
         d = await self.get_data("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
         if player.empty():
@@ -330,6 +346,37 @@ class Music(commands.Cog):
 
         await ctx.message.reply(embed=em)
 
-# TODO: Queue command
+    @commands.command(brief="See the queue of songs", aliases=['q'])
+    async def queue(self, ctx):
+        vc = ctx.voice_client
+        if not vc or not vc.is_connected():
+            return await ctx.send("I'm not connected to a VC")
+        player = self.get_player(ctx)
+        if player.empty():
+            return await ctx.send('There are currently no more queued songs.')
+
+        def generate_embed(page):
+            desc = ""
+            si = (page - 1) * 10
+            for i, s in enumerate(pages[si:si + 10]):
+                desc += "`{:,}.` [{}]({}) | `{}`\n\n".format(
+                    si + 1 + i, s.get('title'), s.get('webpage_url') or
+                    "https://www.youtube.com/watch?v=" + s.get('url'), str(timedelta(seconds=s.get('duration'))))
+            desc += "**{:,} songs in queue | {} total length**".format(len(pages),
+                                                                       str(timedelta(seconds=total_duration)))
+            em = nextcord.Embed(title="Queue for " + ctx.guild.name,
+                                description=desc, colour=self.bot_config["embed_colour"])
+            em.set_footer(text="Page {:,}/{:,}".format(page, last_page), icon_url=ctx.author.display_avatar.url)
+
+            return em
+
+        # noinspection PyProtectedMember
+        # noinspection PyUnresolvedReferences
+        pages = list(player.queue._queue)
+        last_page, total_duration = ceil(len(pages) / 10), player.get_total_duration()
+        msg = await ctx.send("**Processing...**")
+        view = MusicQueuePager(1, last_page, pages, ctx, msg, total_duration)
+        await msg.edit("", embed=generate_embed(view.page), view=view)
+
 # TODO: Voting system for skip
 # TODO: Make some commands admin only
