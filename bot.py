@@ -70,16 +70,13 @@ async def on_command_error(ctx, error):
             await ctx.send("**Command Not Found**: Did you mean `{}`?".format(highest_command[1]))
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(
-            "This command is on cooldown, try again in **{}** seconds".format(str(error.retry_after)),
-            embed=nextcord.Embed(description=repr(error)))
+            "This command is on cooldown, try again in **{}** seconds".format(str(error.retry_after)))
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("**Missing Permissions**: You need `{}`."
-                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)),
-                       embed=nextcord.Embed(description=repr(error)))
+                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)))
     elif isinstance(error, commands.BotMissingPermissions):
         await ctx.send("**Bot Missing Permissions*: {}, please add the permissions to the bot."
-                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)),
-                       embed=nextcord.Embed(description=repr(error)))
+                       .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)))
     elif isinstance(error, commands.NotOwner):
         await ctx.send("**Not Owner**: Only the owner of the bot can execute this command")
     elif isinstance(error, commands.CheckFailure):

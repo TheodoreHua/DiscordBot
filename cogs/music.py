@@ -51,6 +51,7 @@ class Player:
         self.next = asyncio.Event()
         self.current_song = None
         self.force_play = None
+        self.skips = 0
         self.playing = True
         self.volume = 0.5
 
@@ -87,6 +88,7 @@ class Player:
 
             s.cleanup()
             self.current_song = None
+            self.skips = 0
             if len(self.ctx.guild.get_member(self.client.user.id).voice.channel.members) < 2:
                 await self.text_channel.send("Disconnected due to the VC being empty")
                 return self.destroy(self.guild)
@@ -283,8 +285,36 @@ class Music(commands.Cog):
             player.clear()
             await ctx.message.reply("**Queue Cleared** command")
 
-    @commands.command(brief="Skip the song")
+    @commands.command(brief="Skip the song", aliases=['s'])
     async def skip(self, ctx):
+        vc = ctx.voice_client
+        bm = ctx.guild.get_member(self.client.user.id)
+        if not vc or not vc.is_connected():
+            return await ctx.send("I'm not connected to a VC")
+        elif vc.is_paused():
+            return await ctx.send("The player is currently paused, unpause before you skip")
+        elif not vc.is_playing():
+            return await ctx.send("The player is not currently playing anything")
+        elif ctx.author.voice is None or bm.voice.channel != ctx.author.voice.channel:
+            return await ctx.send("You must be in the bot's VC to use this command")
+
+        player = self.get_player(ctx)
+        player.skips += 1
+        vc_count = len([i for i in bm.voice.channel.members if not i.bot])
+        h = ceil(vc_count / 2)
+        if vc_count <= 2:
+            vc.stop()
+            await ctx.message.reply("**Skipped!**")
+        elif player.skips >= h:
+            os = player.skips
+            vc.stop()
+            await ctx.message.reply("**Skipped!** ({:,}/{:,} people)".format(os, h))
+        else:
+            await ctx.message.reply("**Skipping?** ({:,}/{:,} people)".format(player.skips, h))
+
+    @commands.command(brief="Force skip a song", aliases=['fs'])
+    @commands.has_permissions(manage_messages=True)
+    async def forceskip(self, ctx):
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -294,7 +324,7 @@ class Music(commands.Cog):
             return await ctx.send("The player is not currently playing anything")
 
         vc.stop()
-        await ctx.message.reply("**Skipped!**")
+        await ctx.message.reply("**Force Skipped!**")
 
     @commands.command(brief="Play a song immediately", help="Skip the current song play this instead", aliases=['ps'])
     async def playskip(self, ctx, *, url):
@@ -382,6 +412,3 @@ class Music(commands.Cog):
         msg = await ctx.send("**Processing...**")
         view = MusicQueuePager(1, last_page, pages, ctx, msg, total_duration)
         await msg.edit("", embed=generate_embed(view.page), view=view)
-
-# TODO: Voting system for skip
-# TODO: Make some commands admin only
