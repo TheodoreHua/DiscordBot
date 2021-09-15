@@ -33,6 +33,7 @@ class Moderation(commands.Cog):
                       help="Enable automatic unarchiving of a thread if it gets archived (either by Discord or by "
                            "a staff member). Discord is a bit buggy so you may need to use the Thread ID rather than "
                            "mentioning it")
+    @commands.has_permissions(manage_threads=True)
     async def autounarchive(self, ctx, thread: nextcord.Thread):
         if thread.id in self.server_config[str(ctx.guild.id)]["auto_unarchive_threads"]:
             await ctx.send("This thread is already in the auto unarchive list, did you mean to remove it?")
@@ -49,6 +50,7 @@ class Moderation(commands.Cog):
     @commands.command(brief="Remove a thread from the auto unarchive list",
                       help="Disable automatic unarchiving of a thread. Discord is a bit buggy so you may need to use "
                            "the Thread ID rather than mentioning it")
+    @commands.has_permissions(manage_threads=True)
     async def removeautounarchive(self, ctx, thread: nextcord.Thread):
         if thread.id not in self.server_config[str(ctx.guild.id)]["auto_unarchive_threads"]:
             await ctx.send("This thread is not in the auto unarchive list, did you mean to add it?")
