@@ -189,6 +189,11 @@ class Music(commands.Cog):
         player = self.get_player(ctx)
         if 'url' in p and 'ytsearch' in p["url"]:
             return await ctx.message.reply(":x: Searching is not currently supported")
+        elif 'watch?v=' in url and "list=" in url:
+            return await ctx.message.reply(":x: Combo video & playlist links are not supported (when you copy the link "
+                                           "to a song's that's also in a playlist's webpage). Please provide just the "
+                                           "song link or just the playlist link. Just the playlist link is the view "
+                                           "all songs page.")
         elif 'entries' in p:
             c = 0
             for i in p['entries']:
@@ -305,7 +310,7 @@ class Music(commands.Cog):
         player = self.get_player(ctx)
         if 'url' in p and 'ytsearch' in p["url"]:
             return await ctx.message.reply(":x: Searching is not currently supported")
-        elif 'entries' in p:
+        elif 'entries' in p or "list=" in url:
             return await ctx.message.reply(":x: Playlists are not allowed for playskip")
         else:
             if player.empty():
