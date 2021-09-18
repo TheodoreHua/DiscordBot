@@ -247,7 +247,9 @@ class Music(commands.Cog):
         await ctx.message.reply("Left `{}`".format(oc))
 
     @commands.command(brief="Set the volume", help="Set the volume of the music player, may take a couple seconds to "
-                                                   "take effect. Don't provide a parameter to reset to default.")
+                                                   "take effect. This only affects the current session, it'll reset to "
+                                                   "the default whenever a new session occurs, or don't provide a "
+                                                   "parameter to reset to default manually.")
     async def volume(self, ctx, *, volume: float = 0.5):
         vc = ctx.voice_client
         if not vc or not vc.is_connected():

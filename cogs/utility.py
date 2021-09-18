@@ -160,7 +160,7 @@ class Utility(commands.Cog):
                       help="Send a message as a custom user, basically a one-time-use Tupper (if you know what I'm "
                            "talking about). Username and message flags are required, avatar is optional (you can also "
                            "upload an avatar as a file).",
-                      usage="<message> --username:=\"<username>\" --avatar\"[avatar url]\"")
+                      usage="<message> --username:=<username> --avatar:=[avatar url]")
     async def usersend(self, ctx, *, args: TypedFlags):
         await ctx.message.delete()
         if "username" not in args or None not in args:
