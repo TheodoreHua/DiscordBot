@@ -53,18 +53,21 @@ class AcceptDecline(nextcord.ui.View):
 
 # noinspection PyUnusedLocal
 class MusicQueuePager(nextcord.ui.View):
-    def __init__(self, page, last_page, pages, ctx, msg, total_duration):
+    def __init__(self, page, last_page, pages, current_song, ctx, msg, total_duration):
         super().__init__(timeout=300)
         self.expected_uid = ctx.author.id
         self.page = page
         self.last_page = last_page
         self.pages = pages
+        self.current_song = current_song
         self.ctx = ctx
         self.msg = msg
         self.total_duration = total_duration
 
     def generate_embed(self):
-        desc = ""
+        desc = "**Current Song: ** [{}]({}) | `{}`\n\n".format(
+            self.current_song.title, self.current_song.url, str(timedelta(seconds=self.current_song.duration))
+        ) if self.current_song is not None else ""
         si = (self.page - 1) * 10
         for i, s in enumerate(self.pages[si:si + 10]):
             desc += "`{:,}.` [{}]({}) | `{}`\n\n".format(
