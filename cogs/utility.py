@@ -220,3 +220,33 @@ class Utility(commands.Cog):
         e.set_footer(text="Thanks to Crafatar for providing the skin renders.")
         e.add_field(name="UUID", value=uuid)
         await ctx.send(embed=e)
+
+    @commands.command(brief="Send longer messages", help="Combine two existing 2000 character messages into one 4000 "
+                                                         "character message. By default the original 2 messages "
+                                                         "are not deleted, you can pass an extra bool value to delete "
+                                                         "them.", aliases=["combinemessage", "cm"])
+    async def messagecombine(self, ctx, msg1: nextcord.Message, msg2: nextcord.Message, delete_originals: bool = False):
+        await ctx.message.delete()
+        new_message = msg1.content + "\n" + msg2.content
+        if len(new_message) > 4096:
+            return await ctx.send("New message too long", delete_after=15)
+        em = nextcord.Embed(description=new_message)
+        em.set_author(name=ctx.author.name + "#" + ctx.author.discriminator, icon_url=ctx.author.display_avatar.url)
+        await ctx.send(embed=em)
+
+        if delete_originals:
+            await msg1.delete()
+            await msg2.delete()
+
+    @commands.command(brief="Send hyperlinks using embeds", help="Send hyperlinks using embeds, hyperlinks have to be "
+                                                                 "in the format [text](link). All this really does is "
+                                                                 "put your text as the description in an embed, so you "
+                                                                 "can use any other formatting embeds have. If you "
+                                                                 "want a more advanced command, try the embedgen "
+                                                                 "command.")
+    async def hyperlink(self, ctx, *, message):
+        await ctx.message.delete()
+        em = nextcord.Embed(description=message)
+        em.set_author(name=ctx.author.name + "#" + ctx.author.discriminator, icon_url=ctx.author.display_avatar.url)
+
+        await ctx.send(embed=em)
