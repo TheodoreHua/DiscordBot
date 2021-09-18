@@ -96,6 +96,11 @@ class MusicQueuePager(nextcord.ui.View):
     async def before(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.default_response(interaction, self.page - 1)
 
+    @nextcord.ui.button(label="Stop Command", emoji="🛑", style=nextcord.ButtonStyle.red)
+    async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        self.stop()
+        await self.msg.edit(view=None)
+
     @nextcord.ui.button(label=">", style=nextcord.ButtonStyle.blurple)
     async def after(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.default_response(interaction, self.page + 1)
@@ -103,8 +108,3 @@ class MusicQueuePager(nextcord.ui.View):
     @nextcord.ui.button(label=">>", style=nextcord.ButtonStyle.blurple)
     async def last(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.default_response(interaction, self.last_page)
-
-    @nextcord.ui.button(label="Stop Command", emoji="🛑", style=nextcord.ButtonStyle.red)
-    async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        self.stop()
-        await self.msg.edit(view=None)
