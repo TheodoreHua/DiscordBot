@@ -243,7 +243,7 @@ class Utility(commands.Cog):
                                                                  "put your text as the description in an embed, so you "
                                                                  "can use any other formatting embeds have. If you "
                                                                  "want a more advanced command, try the embedgen "
-                                                                 "command.")
+                                                                 "command.", aliases=["embeddescription", "ed", "h"])
     async def hyperlink(self, ctx, *, message):
         await ctx.message.delete()
         em = nextcord.Embed(description=message)
