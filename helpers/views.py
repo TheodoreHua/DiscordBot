@@ -53,20 +53,22 @@ class AcceptDecline(nextcord.ui.View):
 
 # noinspection PyUnusedLocal
 class GenericPager(nextcord.ui.View):
-    def __init__(self, ctx, original_message, page, last_page, entries, line_separator="\n\n", ipp=10, timeout=300):
+    def __init__(self, ctx, original_message, page, last_page, entries, title=None, line_separator="\n\n", ipp=10,
+                 timeout=300):
         super().__init__(timeout=timeout)
         self.ctx = ctx
         self.original_message = original_message
         self.page = page
         self.last_page = last_page
         self.entries = entries
+        self.title = title
         self.line_separator = line_separator
         self.ipp = ipp
         self.expected_uid = ctx.author.id
 
-    async def generate_embed(self):
+    def generate_embed(self):
         si = (self.page - 1) * self.ipp
-        em = nextcord.Embed(description=self.line_separator.join(self.entries[si:si + self.ipp]),
+        em = nextcord.Embed(title=self.title, description=self.line_separator.join(self.entries[si:si + self.ipp]),
                             colour=nextcord.Colour.random())
         em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
                       icon_url=self.ctx.author.display_avatar.url)

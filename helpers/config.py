@@ -19,7 +19,7 @@ class ServerConfig:
         with open("data/server_config.json") as f:
             self.__config__ = json.load(f)
         self.bot_config = bot_config
-        self.defaults = {"prefix": self.bot_config["prefix"], "auto_unarchive_threads": []}
+        self.defaults = {"prefix": self.bot_config["prefix"], "auto_unarchive_threads": [], "aliases": {}}
 
     def __getitem__(self, key):
         return self.__config__[key]

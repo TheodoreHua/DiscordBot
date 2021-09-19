@@ -85,7 +85,9 @@ async def on_command_error(ctx, error):
     else:
         logging.error(
             "Error occurred attempting to execute '{}' by user {}\n{}\n{}".format(
-                ctx.invoked_with, ctx.author.id, repr(error), "\n".join(format_tb(error.__traceback__))))
+                ctx.invoked_with, ctx.author.id, repr(error), "\n".join(format_tb(error.__traceback__))) +
+            ("{}\n{}".format(repr(error.__cause__), "\n".join(format_tb(error.__cause__.__traceback__)))
+             if error.__cause__ is not None else ""))
         await ctx.send(embed=nextcord.Embed(
             description=":x: An internal exception occurred while running this command.", colour=nextcord.Colour.red()))
 
