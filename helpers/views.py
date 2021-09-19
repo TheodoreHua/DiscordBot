@@ -52,9 +52,60 @@ class AcceptDecline(nextcord.ui.View):
         await self.default_response(interaction, False)
 
 # noinspection PyUnusedLocal
-class MusicQueuePager(nextcord.ui.View):
+class GenericPager(nextcord.ui.View):
+    def __init__(self, ctx, original_message, page, last_page, entries, line_separator="\n\n", ipp=10, timeout=300):
+        super().__init__(timeout=timeout)
+        self.ctx = ctx
+        self.original_message = original_message
+        self.page = page
+        self.last_page = last_page
+        self.entries = entries
+        self.line_separator = line_separator
+        self.ipp = ipp
+        self.expected_uid = ctx.author.id
+
+    async def generate_embed(self):
+        si = (self.page - 1) * self.ipp
+        em = nextcord.Embed(description=self.line_separator.join(self.entries[si:si + self.ipp]),
+                            colour=nextcord.Colour.random())
+        em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
+                      icon_url=self.ctx.author.display_avatar.url)
+        return em
+
+    async def resp(self, interaction: nextcord.Interaction, new_page):
+        if interaction.user.id != self.expected_uid:
+            return await interaction.response.send_message("You weren't the one who sent the command!", ephemeral=True)
+        elif not self.last_page >= new_page >= 1:
+            return await interaction.response.send_message("You've already reached the first/last page", ephemeral=True)
+        self.page = new_page
+
+        await self.original_message.edit(embed=self.generate_embed())
+
+    @nextcord.ui.button(label="<<", style=nextcord.ButtonStyle.blurple)
+    async def first(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.resp(interaction, 1)
+
+    @nextcord.ui.button(label="<", style=nextcord.ButtonStyle.blurple)
+    async def before(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.resp(interaction, self.page - 1)
+
+    @nextcord.ui.button(label="Stop Command", emoji="🛑", style=nextcord.ButtonStyle.red)
+    async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        self.stop()
+        await self.original_message.edit(view=None)
+
+    @nextcord.ui.button(label=">", style=nextcord.ButtonStyle.blurple)
+    async def after(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.resp(interaction, self.page + 1)
+
+    @nextcord.ui.button(label=">>", style=nextcord.ButtonStyle.blurple)
+    async def last(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        await self.resp(interaction, self.last_page)
+
+# noinspection PyUnusedLocal
+class MusicQueuePager(GenericPager):
     def __init__(self, page, last_page, pages, current_song, ctx, msg, total_duration):
-        super().__init__(timeout=300)
+        super().__init__(ctx, msg, page, last_page, pages)
         self.expected_uid = ctx.author.id
         self.page = page
         self.last_page = last_page
@@ -82,7 +133,7 @@ class MusicQueuePager(nextcord.ui.View):
 
         return em
 
-    async def default_response(self, interaction, new_page):
+    async def resp(self, interaction, new_page):
         if interaction.user.id != self.expected_uid:
             return await interaction.response.send_message("You weren't the one who sent the command!", ephemeral=True)
         elif not self.last_page >= new_page >= 1:
@@ -90,24 +141,3 @@ class MusicQueuePager(nextcord.ui.View):
         self.page = new_page
 
         await self.msg.edit(embed=self.generate_embed())
-
-    @nextcord.ui.button(label="<<", style=nextcord.ButtonStyle.blurple)
-    async def first(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await self.default_response(interaction, 1)
-
-    @nextcord.ui.button(label="<", style=nextcord.ButtonStyle.blurple)
-    async def before(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await self.default_response(interaction, self.page - 1)
-
-    @nextcord.ui.button(label="Stop Command", emoji="🛑", style=nextcord.ButtonStyle.red)
-    async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        self.stop()
-        await self.msg.edit(view=None)
-
-    @nextcord.ui.button(label=">", style=nextcord.ButtonStyle.blurple)
-    async def after(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await self.default_response(interaction, self.page + 1)
-
-    @nextcord.ui.button(label=">>", style=nextcord.ButtonStyle.blurple)
-    async def last(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        await self.default_response(interaction, self.last_page)
