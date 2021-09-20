@@ -90,11 +90,16 @@ class BotHelp(HelpCommand):
         await self.get_destination().send(embed=em)
 
     async def send_group_help(self, group):
-        # TODO: make group help
-        pass
+        l = []
+        for i in await self.filter_commands(group.commands, sort=True):
+            name = ("**__{}__**" if isinstance(i, Group) else "**{}**").format(i.name)
+            l.append("{} - {}".format(name, i.brief or ""))
+        msg = await self.get_destination().send("Processing...")
+        view = GenericPager(self.context, msg, 1, ceil(len(l) / 30), l, ipp=30, line_separator="\n")
+        await msg.edit(None, embed=view.generate_embed(), view=view)
 
     async def send_cog_help(self, cog):
-        l = [cog.description] if cog.description else []
+        l = [cog.description + "\n"] if cog.description else []
         for i in await self.filter_commands(cog.get_commands(), sort=True):
             name = ("**__{}__**" if isinstance(i, Group) else "**{}**").format(i.name)
             l.append("{} - {}".format(name, i.brief or ""))
