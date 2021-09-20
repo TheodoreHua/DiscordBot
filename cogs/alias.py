@@ -53,6 +53,6 @@ class Alias(commands.Cog):
         if len(aliases) < 1:
             return await ctx.send("This server has no aliases, create one with the `addalias` command")
         msg = await ctx.send("Processing...")
-        view = GenericPager(ctx, msg, 1, ceil(len(aliases) / 10), aliases, title="Aliases for " + ctx.guild.name,
-                            line_separator="\n", timeout=120)
+        view = GenericPager(ctx, msg, 1, aliases, title="Aliases for " + ctx.guild.name, line_separator="\n",
+                            timeout=120)
         await msg.edit(None, embed=view.generate_embed(), view=view)

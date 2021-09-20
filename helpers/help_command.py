@@ -28,7 +28,7 @@ class BotHelp(HelpCommand):
 
     async def send(self):
         msg = await self.get_destination().send("Processing...")
-        view = HelpPager(self.context, msg, 1, ceil(len(self.f) / 25), self.f, "Help")
+        view = HelpPager(self.context, msg, 1, self.f, title="Help", ipp=25)
         await msg.edit(None, embed=view.generate_embed(), view=view)
 
     async def command_callback(self, ctx, *, command=None):
@@ -86,7 +86,7 @@ class BotHelp(HelpCommand):
                             description=command.help or command.brief or None, colour=nextcord.Colour.random())
         em.add_field(name="Category", value=command.cog_name if command.cog_name is not None else "Uncategorized")
         if len(command.aliases) > 0:
-            em.add_field(name="Command Aliases", value=" ".join(["`{}`".format(i) for i in command.aliases]))
+            em.add_field(name="Command Aliases", value=", ".join(["`{}`".format(i) for i in command.aliases]))
         await self.get_destination().send(embed=em)
 
     async def send_group_help(self, group):
@@ -95,7 +95,7 @@ class BotHelp(HelpCommand):
             name = ("**__{}__**" if isinstance(i, Group) else "**{}**").format(i.name)
             l.append("{} - {}".format(name, i.brief or "*No command brief*"))
         msg = await self.get_destination().send("Processing...")
-        view = GenericPager(self.context, msg, 1, ceil(len(l) / 30), l, ipp=30, line_separator="\n")
+        view = GenericPager(self.context, msg, 1, l, ipp=30, line_separator="\n")
         await msg.edit(None, embed=view.generate_embed(), view=view)
 
     async def send_cog_help(self, cog):
@@ -104,6 +104,5 @@ class BotHelp(HelpCommand):
             name = ("**__{}__**" if isinstance(i, Group) else "**{}**").format(i.name)
             l.append("{} - {}".format(name, i.brief or "*No command brief*"))
         msg = await self.get_destination().send("Processing...")
-        view = GenericPager(self.context, msg, 1, ceil(len(l) / 30), l, title=cog.qualified_name, ipp=30,
-                            line_separator="\n")
+        view = GenericPager(self.context, msg, 1, l, title=cog.qualified_name, ipp=30, line_separator="\n")
         await msg.edit(None, embed=view.generate_embed(), view=view)

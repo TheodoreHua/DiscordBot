@@ -239,9 +239,9 @@ class Utility(commands.Cog):
             await msg2.delete()
 
     @commands.command(brief="Send hyperlinks using embeds", help="Send hyperlinks using embeds, hyperlinks have to be "
-                                                                 "in the format [text](link). All this really does is "
-                                                                 "put your text as the description in an embed, so you "
-                                                                 "can use any other formatting embeds have. If you "
+                                                                 "in the format `[text](link)`. All this really does "
+                                                                 "is put your text as the description in an embed, so "
+                                                                 "you can use any other formatting embeds have. If you "
                                                                  "want a more advanced command, try the embedgen "
                                                                  "command.", aliases=["embeddescription", "ed", "h"])
     async def hyperlink(self, ctx, *, message):

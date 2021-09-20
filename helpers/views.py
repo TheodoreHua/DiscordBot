@@ -1,4 +1,5 @@
 from datetime import timedelta
+from math import ceil
 
 import nextcord
 
@@ -53,13 +54,13 @@ class AcceptDecline(nextcord.ui.View):
 
 # noinspection PyUnusedLocal
 class GenericPager(nextcord.ui.View):
-    def __init__(self, ctx, original_message, page, last_page, entries, title=None, line_separator="\n\n", ipp=10,
+    def __init__(self, ctx, original_message, page, entries, last_page=None, title=None, line_separator="\n\n", ipp=10,
                  timeout=300):
         super().__init__(timeout=timeout)
         self.ctx = ctx
         self.original_message = original_message
         self.page = page
-        self.last_page = last_page
+        self.last_page = last_page or ceil(len(entries) / ipp)
         self.entries = entries
         self.title = title
         self.line_separator = line_separator
@@ -107,14 +108,10 @@ class GenericPager(nextcord.ui.View):
 # noinspection PyUnusedLocal
 class MusicQueuePager(GenericPager):
     def __init__(self, page, last_page, pages, current_song, ctx, msg, total_duration):
-        super().__init__(ctx, msg, page, last_page, pages)
-        self.expected_uid = ctx.author.id
-        self.page = page
-        self.last_page = last_page
+        super().__init__(ctx, msg, page, pages, last_page=last_page)
         self.pages = pages
-        self.current_song = current_song
-        self.ctx = ctx
         self.msg = msg
+        self.current_song = current_song
         self.total_duration = total_duration
 
     def generate_embed(self):
