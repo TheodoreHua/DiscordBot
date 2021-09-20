@@ -20,7 +20,7 @@ class BotHelp(HelpCommand):
 
         for command in commands:
             name = ("**__{}__**" if isinstance(command, Group) else "**{}**").format(command.name)
-            entry = "{} - {}".format(name, command.brief or "")
+            entry = "{} - {}".format(name, command.brief or "*No command brief*")
             if len("\n".join(self.f[heading] + [entry])) > 1024:
                 heading += " Continued"
                 self.f[heading] = []
@@ -93,7 +93,7 @@ class BotHelp(HelpCommand):
         l = []
         for i in await self.filter_commands(group.commands, sort=True):
             name = ("**__{}__**" if isinstance(i, Group) else "**{}**").format(i.name)
-            l.append("{} - {}".format(name, i.brief or ""))
+            l.append("{} - {}".format(name, i.brief or "*No command brief*"))
         msg = await self.get_destination().send("Processing...")
         view = GenericPager(self.context, msg, 1, ceil(len(l) / 30), l, ipp=30, line_separator="\n")
         await msg.edit(None, embed=view.generate_embed(), view=view)
@@ -102,7 +102,7 @@ class BotHelp(HelpCommand):
         l = [cog.description + "\n"] if cog.description else []
         for i in await self.filter_commands(cog.get_commands(), sort=True):
             name = ("**__{}__**" if isinstance(i, Group) else "**{}**").format(i.name)
-            l.append("{} - {}".format(name, i.brief or ""))
+            l.append("{} - {}".format(name, i.brief or "*No command brief*"))
         msg = await self.get_destination().send("Processing...")
         view = GenericPager(self.context, msg, 1, ceil(len(l) / 30), l, title=cog.qualified_name, ipp=30,
                             line_separator="\n")
