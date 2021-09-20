@@ -10,34 +10,9 @@ from dotenv import load_dotenv
 
 from cogs import cogs
 from helpers import *
-from helpers.views import HelpPager
+from helpers.help_command import BotHelp
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
-
-class BotHelp(commands.DefaultHelpCommand):
-    def __init__(self, **options):
-        super().__init__(**options)
-        self.paginator.prefix = ""
-        self.paginator.suffix = ""
-
-    async def send_pages(self):
-        # Very bad, lazy, and hacky way of generating a custom formatted help command without making it from scratch
-        p = []
-        for i, j in enumerate(self.paginator.pages):
-            desc = j
-            for id, k in enumerate(findall(r"(.*):\n", desc)):
-                if id == 0 and i == 0:
-                    desc = desc.replace(k + ":", "**{}**:".format(k))
-                else:
-                    desc = desc.replace(k + ":", "\n**{}**:".format(k))
-            for k in findall(r" {2}([a-zA-Z]+) *(.*)", desc):
-                desc = resub(" {2}" + reescape(k[0]) + " *" + k[1], "__{}__ - *{}*".format(*k), desc)
-            p.append(desc)
-
-        msg = await self.get_destination().send("Processing...")
-        view = HelpPager(self.context, msg, 1, len(p), p, "Help")
-        await msg.edit(None, embed=view.generate_embed(), view=view)
-
 
 assert_data()
 bot_config, user_config = BotConfig(), UserConfig()

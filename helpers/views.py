@@ -146,8 +146,11 @@ class MusicQueuePager(GenericPager):
 
 class HelpPager(GenericPager):
     def generate_embed(self):
-        desc = self.entries[self.page - 1]
-        em = nextcord.Embed(title=self.title, description=desc, colour=nextcord.Colour.random())
+        si = (self.page - 1) * 25
+        fs = sorted(self.entries)[si:si + 25]
+        em = nextcord.Embed(title=self.title, colour=nextcord.Colour.random())
         em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
                       icon_url=self.ctx.author.display_avatar.url)
+        for n in fs:
+            em.add_field(name=n, value="\n".join(self.entries[n]), inline=False)
         return em
