@@ -39,6 +39,8 @@ class ServerConfig:
 
     def get_prefix(self, client, message):
         """Method to be passed to a commands.Bot instance in order to dynamically generate a prefix per server"""
+        if message.guild is None:
+            return self.defaults["prefix"]
         return self.__config__[str(message.guild.id)]["prefix"]
 
     def add_guild(self, guild):
