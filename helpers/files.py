@@ -6,11 +6,10 @@ from os.path import isfile, isdir
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
 
 default_bot_config = {
-    "owner_id": 616032766974361640,
-    "description": "A bot with various utilities that I (the author of the bot) find lacking in other bots, are "
-                   "behind a paywall, or wish to be combined into a singular bot.",
-    "status": "b.help",
-    "prefix": "b.",
+    "owner_id": None,
+    "description": "A bot with various random utilities, some useful, some not",
+    "status": "!help",
+    "prefix": "!",
     "embed_colour": 7857407
 }
 
