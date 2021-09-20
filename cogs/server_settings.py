@@ -8,6 +8,7 @@ class ServerSettings(commands.Cog, name="Server Settings"):
         self.user_config = user_config
 
     @commands.command(brief="Set the bot's prefix for this server")
+    @commands.guild_only()
     async def setprefix(self, ctx, *, prefix):
         self.server_config[str(ctx.guild.id)]["prefix"] = prefix
         self.server_config.write_config()

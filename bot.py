@@ -80,13 +80,13 @@ async def on_command_error(ctx, error):
                        .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)))
     elif isinstance(error, commands.NotOwner):
         await ctx.send("**Not Owner**: Only the owner of the bot can execute this command")
-    elif isinstance(error, commands.CheckFailure):
-        await ctx.send("**Check Failure**: A check required to run this command has failed, most likely meaning you "
-                       "don't have permissions.")
     elif isinstance(error, commands.NoPrivateMessage):
         await ctx.send("**No Private Message**: This command can only be used in guilds, not private messages")
     elif isinstance(error, commands.PrivateMessageOnly):
         await ctx.send("**Private Message Only**: This command can only be used in (DM/PM)s")
+    elif isinstance(error, commands.CheckFailure):
+        await ctx.send("**Check Failure**: A check required to run this command has failed, most likely meaning you "
+                       "don't have permissions.")
     else:
         logging.error(
             "Error occurred attempting to execute '{}' by user {}\n{}\n{}".format(

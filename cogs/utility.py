@@ -52,6 +52,7 @@ class Utility(commands.Cog):
         await ctx.send("Pong! `{:,.4f}ms`".format(self.client.latency * 1000))
 
     @commands.command(brief="Show info about this server")
+    @commands.guild_only()
     async def serverinfo(self, ctx):
         g = ctx.guild
         fields = {
@@ -91,6 +92,7 @@ class Utility(commands.Cog):
         await ctx.message.channel.send(embed=em)
 
     @commands.command(brief="Show info about a member", help="Show info about a user/member, specific to this server")
+    @commands.guild_only()
     async def memberinfo(self, ctx, member: nextcord.Member):
         em = nextcord.Embed(description=member.mention, colour=self.bot_config["embed_colour"])
         em.set_thumbnail(url=member.display_avatar.url)
@@ -127,6 +129,7 @@ class Utility(commands.Cog):
                            "emote with :emote name here:. You should only use this if you don't have nitro, or it'll "
                            "probably mess up with Discord's autocomplete. For example: Hello :animated wave:.",
                       aliases=["ae"])
+    @commands.guild_only()
     async def animatedemoji(self, ctx, *, message):
         def similar(a, b):
             return SequenceMatcher(None, a, b).ratio()

@@ -13,6 +13,7 @@ class Alias(commands.Cog):
         self.user_config = user_config
 
     @commands.command(brief="Call upon an alias", aliases=["a"])
+    @commands.guild_only()
     async def alias(self, ctx, *, name):
         name = name.lower()
         if name not in self.server_config[str(ctx.guild.id)]["aliases"]:
@@ -26,6 +27,7 @@ class Alias(commands.Cog):
     @commands.command(brief="Add a message alias that can be called upon at any time", usage="\"<name>\" <message>",
                       help="Add a message alias that can be called upon by using \"alias <name\" at any time. They are "
                            "not case sensitive.")
+    @commands.guild_only()
     @commands.has_guild_permissions(manage_messages=True)
     async def addalias(self, ctx, name, *, message):
         name = name.lower()
@@ -38,6 +40,7 @@ class Alias(commands.Cog):
         await ctx.send(embed=em)
 
     @commands.command(brief="Remove a message alias")
+    @commands.guild_only()
     @commands.has_guild_permissions(manage_messages=True)
     async def removealias(self, ctx, *, name):
         name = name.lower()
@@ -48,6 +51,7 @@ class Alias(commands.Cog):
         await ctx.send("Alias `{}` removed".format(name))
 
     @commands.command(brief="Get a list of aliases")
+    @commands.guild_only()
     async def aliases(self, ctx):
         aliases = list(self.server_config[str(ctx.guild.id)]["aliases"].keys())
         if len(aliases) < 1:

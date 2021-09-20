@@ -82,6 +82,7 @@ class Reminders(commands.Cog):
                            "reminder time is usually at most 5 seconds.", aliases=["remindme"],
                       usage="<reminder message> --days:=[days] --hours:=[hours] --minutes:=[minutes] "
                             "--seconds:=[seconds] --dm:=[yes/no]")
+    @commands.guild_only()
     async def addreminder(self, ctx, *, args: TypedFlags):
         try:
             seconds = 0
