@@ -253,3 +253,51 @@ class Utility(commands.Cog):
         em.set_author(name=ctx.author.name + "#" + ctx.author.discriminator, icon_url=ctx.author.display_avatar.url)
 
         await ctx.send(embed=em)
+
+    @commands.command(brief="Send a custom embed", aliases=["embedgen", "eg"],
+                      help="Send your own custom embed, all embed options are available under flags (as seen in the "
+                           "usage help). You can define your own custom fields by using flags as well, you just can't "
+                           "name them anything that already exists. For example the flag `--Test Field:=Something` "
+                           "would result in a field named `Test Field` with a value of `Something` Keep in mind "
+                           "Discord embed limits, they apply. If you don't know the type of value you have to pass into "
+                           "certain options, you're going to run into issues. That's why it's recommended to leave "
+                           "this for people who know what they're doing. One very common one is colour, it has to be "
+                           "in decimal form, not hex. Some image arguments only work if their text is defined, for "
+                           "example `footer_icon_url` only works if `footer_text` is defined.",
+                      usage="--title:=[title] --description:=[description] --colour:=[colour in decimal format] "
+                            "--url:=[title url] --footer_text:=[footer text] --footer_icon_url:=[footer icon url] "
+                            "--image:=[image] --thumbnail:=[thumbnail] --author_name:=[author name] "
+                            "--author_icon_url:=[author icon url] --author_url:=[author url]")
+    async def embed(self, ctx, *, args: TypedFlags):
+        await ctx.message.delete()
+        reserved_opts = [None, 'title', 'description', 'colour', 'url', 'footer_text', 'footer_icon_url', 'image',
+                         'thumbnail', 'author_name', 'author_icon_url', 'author_url']
+        try:
+            e = nextcord.Embed.Empty
+            em = nextcord.Embed(title=args.get('title', e), description=args.get('description', e),
+                                colour=int(args.get('colour')) if 'colour' in args else e, url=args.get('url', e))
+            if "footer_text" in args:
+                em.set_footer(text=args.get('footer_text', e), icon_url=args.get('footer_icon_url', e))
+            if "image" in args:
+                em.set_image(url=args.get('image', e))
+            if "thumbnail" in args:
+                em.set_thumbnail(url=args.get('thumbnail', e))
+            if "author_name" in args or "author_icon_url" in args:
+                em.set_author(name=args.get('author_name', ''), icon_url=args.get('author_icon_url', e),
+                              url=args.get('author_url', e))
+            for i in reserved_opts:
+                try:
+                    del args[i]
+                except KeyError:
+                    pass
+            c = 0
+            for n, v in args.items():
+                if c >= 25:
+                    return await ctx.send("Too many fields")
+                em.add_field(name=n, value=v)
+                c += 1
+        except ValueError:
+            return await ctx.send("Some conversion failed, likely due to an invalid value", delete_after=15)
+        except nextcord.HTTPException:
+            return await ctx.send("Invalid value in embed, couldn't send it", delete_after=15)
+        await ctx.send(embed=em)
