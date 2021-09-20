@@ -142,10 +142,15 @@ class MusicQueuePager(GenericPager):
         await self.msg.edit(embed=self.generate_embed())
 
 class HelpPager(GenericPager):
+    def __init__(self, ctx, original_message, page, entries, last_page=None, title=None, line_separator="\n\n", ipp=10,
+                 timeout=300, description=None):
+        super().__init__(ctx, original_message, page, entries, last_page, title, line_separator, ipp, timeout)
+        self.description = description
+
     def generate_embed(self):
         si = (self.page - 1) * 25
         fs = sorted(self.entries)[si:si + 25]
-        em = nextcord.Embed(title=self.title, colour=nextcord.Colour.random())
+        em = nextcord.Embed(title=self.title, description=self.description, colour=nextcord.Colour.random())
         em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
                       icon_url=self.ctx.author.display_avatar.url)
         for n in fs:

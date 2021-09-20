@@ -1,5 +1,4 @@
 import itertools
-from math import ceil
 
 import nextcord
 from nextcord.ext.commands import Group, HelpCommand
@@ -7,8 +6,9 @@ from nextcord.ext.commands import Group, HelpCommand
 from helpers.views import GenericPager, HelpPager
 
 class BotHelp(HelpCommand):
-    def __init__(self, **options):
+    def __init__(self, bot_config, **options):
         super().__init__(**options)
+        self.bot_config = bot_config
         self.f = {}
 
     def add_commands(self, commands, *, heading):
@@ -28,7 +28,7 @@ class BotHelp(HelpCommand):
 
     async def send(self):
         msg = await self.get_destination().send("Processing...")
-        view = HelpPager(self.context, msg, 1, self.f, title="Help", ipp=25)
+        view = HelpPager(self.context, msg, 1, self.f, title="Help", ipp=25, description=self.bot_config["description"])
         await msg.edit(None, embed=view.generate_embed(), view=view)
 
     async def command_callback(self, ctx, *, command=None):

@@ -21,7 +21,7 @@ intents = nextcord.Intents.all()
 allowed_mentions = nextcord.AllowedMentions(everyone=False, replied_user=False)
 client = commands.Bot(command_prefix=server_config.get_prefix, guild_subscriptions=True, intents=intents,
                       owner_id=bot_config["owner_id"], description=bot_config["description"],
-                      allowed_mentions=allowed_mentions, help_command=BotHelp())
+                      allowed_mentions=allowed_mentions, help_command=BotHelp(bot_config))
 
 for cog in cogs:
     client.add_cog(cog(client, bot_config, server_config, user_config))
