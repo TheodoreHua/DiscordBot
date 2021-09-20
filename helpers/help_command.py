@@ -4,7 +4,7 @@ from math import ceil
 import nextcord
 from nextcord.ext.commands import Group, HelpCommand
 
-from helpers.views import HelpPager
+from helpers.views import GenericPager, HelpPager
 
 class BotHelp(HelpCommand):
     def __init__(self, **options):
@@ -19,11 +19,8 @@ class BotHelp(HelpCommand):
             self.f[heading] = []
 
         for command in commands:
-            if isinstance(command, Group):
-                name = "**__{}__**".format(command.name)
-            else:
-                name = "**{}**".format(command.name)
-            entry = "{} - {}".format(name, command.name or "")
+            name = ("**__{}__**" if isinstance(command, Group) else "**{}**").format(command.name)
+            entry = "{} - {}".format(name, command.brief or "")
             if len("\n".join(self.f[heading] + [entry])) > 1024:
                 heading += " Continued"
                 self.f[heading] = []
@@ -97,5 +94,11 @@ class BotHelp(HelpCommand):
         pass
 
     async def send_cog_help(self, cog):
-        # TODO: make cog help
-        pass
+        l = [cog.description] if cog.description else []
+        for i in await self.filter_commands(cog.get_commands(), sort=True):
+            name = ("**__{}__**" if isinstance(i, Group) else "**{}**").format(i.name)
+            l.append("{} - {}".format(name, i.brief or ""))
+        msg = await self.get_destination().send("Processing...")
+        view = GenericPager(self.context, msg, 1, ceil(len(l) / 30), l, title=cog.qualified_name, ipp=30,
+                            line_separator="\n")
+        await msg.edit(None, embed=view.generate_embed(), view=view)
