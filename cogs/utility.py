@@ -301,4 +301,4 @@ class Utility(commands.Cog):
         except nextcord.HTTPException:
             return await ctx.send("Invalid value in embed, couldn't send it", delete_after=15)
         webhook = await get_webhook(ctx, self.client)
-        await webhook.send(embed=em)
+        await webhook.send(embed=em, username=ctx.author.display_name, avatar_url=ctx.author.display_avatar.url)
