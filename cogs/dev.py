@@ -147,10 +147,13 @@ class Dev(commands.Cog):
             response = await ctx.send(msg)
         return response
 
-    @commands.command(name="eval", aliases=["e"], brief="Run some Python code and get the results")
-    async def _eval(self, ctx, *, code):
+    @commands.command(name="eval", aliases=["e"], brief="Run some Python code and get the results",
+                      usage="<code>")
+    async def _eval(self, ctx, *, code=None):
         if ctx.author.id in self.jobs:
             return await ctx.send("You already have an eval job running, please wait for it to finish")
+        if not code:
+            return await ctx.send_help(ctx.command)
 
         self.jobs[ctx.author.id] = time()
         code = self.prepare_input(code)
