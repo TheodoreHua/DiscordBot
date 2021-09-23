@@ -300,4 +300,5 @@ class Utility(commands.Cog):
             return await ctx.send("Some conversion failed, likely due to an invalid value", delete_after=15)
         except nextcord.HTTPException:
             return await ctx.send("Invalid value in embed, couldn't send it", delete_after=15)
-        await ctx.send(embed=em)
+        webhook = await get_webhook(ctx, self.client)
+        await webhook.send(embed=em)
