@@ -230,6 +230,7 @@ class Utility(commands.Cog):
                                                          "character message. By default the original 2 messages "
                                                          "are not deleted, you can pass an extra bool value to delete "
                                                          "them.", aliases=["combinemessage", "cm"])
+    @commands.guild_only()
     async def messagecombine(self, ctx, msg1: nextcord.Message, msg2: nextcord.Message, delete_originals: bool = False):
         await ctx.message.delete()
         new_message = msg1.content + "\n" + msg2.content
@@ -249,6 +250,7 @@ class Utility(commands.Cog):
                                                                  "you can use any other formatting embeds have. If you "
                                                                  "want a more advanced command, try the embedgen "
                                                                  "command.", aliases=["embeddescription", "ed", "h"])
+    @commands.guild_only()
     async def hyperlink(self, ctx, *, message):
         await ctx.message.delete()
         em = nextcord.Embed(description=message)
