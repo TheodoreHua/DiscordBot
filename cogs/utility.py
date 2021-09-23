@@ -153,6 +153,7 @@ class Utility(commands.Cog):
         await webhook.send(content=new_str, username=ctx.author.display_name, avatar_url=ctx.author.display_avatar.url)
 
     @commands.command(brief="Send a message as another user (to impersonate them)")
+    @commands.guild_only()
     async def impersonate(self, ctx, user: nextcord.User, *, message):
         await ctx.message.delete()
 
@@ -164,6 +165,7 @@ class Utility(commands.Cog):
                            "talking about). Username and message flags are required, avatar is optional (you can also "
                            "upload an avatar as a file).",
                       usage="<message> --username:=<username> --avatar:=[avatar url]")
+    @commands.guild_only()
     async def usersend(self, ctx, *, args: TypedFlags):
         await ctx.message.delete()
         if "username" not in args or None not in args:
@@ -268,6 +270,7 @@ class Utility(commands.Cog):
                             "--url:=[title url] --footer_text:=[footer text] --footer_icon_url:=[footer icon url] "
                             "--image:=[image] --thumbnail:=[thumbnail] --author_name:=[author name] "
                             "--author_icon_url:=[author icon url] --author_url:=[author url]")
+    @commands.guild_only()
     async def embed(self, ctx, *, args: TypedFlags):
         await ctx.message.delete()
         reserved_opts = [None, 'title', 'description', 'colour', 'url', 'footer_text', 'footer_icon_url', 'image',
