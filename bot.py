@@ -2,7 +2,6 @@ import logging
 from difflib import SequenceMatcher
 from os import environ, getenv
 from traceback import format_tb
-from re import findall, sub as resub, escape as reescape
 
 import nextcord
 from nextcord.ext import commands

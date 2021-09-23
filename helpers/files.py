@@ -10,7 +10,8 @@ default_bot_config = {
     "description": "A bot with various random utilities, some useful, some not",
     "status": "!help",
     "prefix": "!",
-    "embed_colour": 7857407
+    "embed_colour": 7857407,
+    "snekbox": ""
 }
 
 def assert_data():

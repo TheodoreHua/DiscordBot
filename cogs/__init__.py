@@ -6,5 +6,6 @@ from .minigames import Minigames
 from .reminders import Reminders
 from .music import Music
 from .alias import Alias
+from .dev import Dev
 
-cogs = [BotOwner, Utility, ServerSettings, Moderation, Minigames, Reminders, Music, Alias]
+cogs = [BotOwner, Utility, ServerSettings, Moderation, Minigames, Reminders, Music, Alias, Dev]
