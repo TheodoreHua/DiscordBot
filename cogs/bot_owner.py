@@ -53,7 +53,7 @@ class BotOwner(commands.Cog):
                                                      stdout=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
         await ctx.send("```\n{}\n```".format(stdout.decode()) +
-                       "\n\nERR\n```\n{}\n```".format(stderr.decode()) if stderr else "")
+                       ("\n\nERR\n```\n{}\n```".format(stderr.decode()) if stderr else ""))
 
     @commands.command(hidden=True)
     @commands.is_owner()
