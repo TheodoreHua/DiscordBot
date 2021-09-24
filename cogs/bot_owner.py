@@ -52,7 +52,7 @@ class BotOwner(commands.Cog):
         proc = await asyncio.create_subprocess_shell("venv/bin/python -m pip install -r requirements.txt",
                                                      stdout=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
-        await ctx.send(embed=nextcord.Embed(description="```\n{}\n```".format(stdout.decode()[3992:])))
+        await ctx.send(embed=nextcord.Embed(description="```\n{}\n```".format(stdout.decode()[:-3992])))
 
     @commands.command(hidden=True)
     @commands.is_owner()
