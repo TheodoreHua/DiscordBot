@@ -52,7 +52,7 @@ class BotOwner(commands.Cog):
         proc = await asyncio.create_subprocess_shell("venv/bin/python -m pip install -r requirements.txt",
                                                      stdout=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
-        await ctx.send("Requirements exited with {}\n```\n{}\n```".format(proc.returncode, stdout.decode()) +
+        await ctx.send("```\n{}\n```".format(stdout.decode()) +
                        "\n\nERR\n```\n{}\n```".format(stderr.decode()) if stderr else "")
 
     @commands.command(hidden=True)
