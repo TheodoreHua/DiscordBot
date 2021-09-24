@@ -2,6 +2,7 @@ import asyncio
 import logging
 import sys
 
+import requests
 import nextcord
 from nextcord.ext import commands
 
@@ -52,7 +53,9 @@ class BotOwner(commands.Cog):
         proc = await asyncio.create_subprocess_shell("venv/bin/python -m pip install -r requirements.txt",
                                                      stdout=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
-        await ctx.send("```\n{}\n```".format(stdout.decode()[-1992:]))
+        r = requests.post("https://hastebin.com/documents", data=stdout.encode("utf-8"))
+        paste_link = "https://hastebin.com/" + r.json()["key"] if r.ok else None
+        await ctx.send("```{}\n{}\n```".format(paste_link, stdout.decode()[-1900:]))
 
     @commands.command(hidden=True)
     @commands.is_owner()
