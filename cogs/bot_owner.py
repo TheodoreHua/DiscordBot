@@ -48,6 +48,15 @@ class BotOwner(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.is_owner()
+    async def reinstallrequirements(self, ctx):
+        proc = await asyncio.create_subprocess_shell("venv/bin/python -m pip install -r requirements.txt",
+                                                     stdout=asyncio.subprocess.PIPE)
+        stdout, stderr = await proc.communicate()
+        await ctx.send("Requirements exited with {}\n```\n{}\n```".format(proc.returncode, stdout.decode()) +
+                       "\n\nERR\n```\n{}\n```".format(stderr.decode()) if stderr else "")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
     async def restart(self, ctx):
         logging.info("Received restart command, terminating program and letting start script restart it")
         await ctx.send("Restarting...")
