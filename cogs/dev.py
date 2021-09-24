@@ -124,6 +124,7 @@ class Dev(commands.Cog):
         async with ctx.typing():
             r = requests.post(self.bot_config["snekbox"], json={"input": code})
             if not r.ok:
+                print(repr(r), r.ok, r.text)
                 return None
             else:
                 results = r.json()
