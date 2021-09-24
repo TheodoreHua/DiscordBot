@@ -55,7 +55,7 @@ class BotOwner(commands.Cog):
         stdout, stderr = await proc.communicate()
         r = requests.post("https://hastebin.com/documents", data=stdout)
         paste_link = "https://hastebin.com/" + r.json()["key"] if r.ok else None
-        await ctx.send("```{}\n{}\n```".format(paste_link, stdout.decode()[-1900:]))
+        await ctx.send("{}\n```\n{}\n```".format(paste_link, stdout.decode()[-1900:]))
 
     @commands.command(hidden=True)
     @commands.is_owner()
