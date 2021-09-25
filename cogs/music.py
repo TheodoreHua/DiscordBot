@@ -177,9 +177,9 @@ class Music(commands.Cog):
             raise YTDLError("Couldn't find anything that matches `{}`".format(url))
         return data
 
-    @commands.command(brief="Play a song or playlist from YouTube", aliases=['p'])
+    @commands.command(brief="Play a song or playlist from YouTube", aliases=['p'], usage="<youtube url>")
     @commands.guild_only()
-    async def play(self, ctx, url):
+    async def play(self, ctx, *, url):
         if await self.handle_join(ctx) is None:
             return
         await ctx.send("**Joined** `{}`".format(ctx.author.voice.channel.name))
@@ -255,7 +255,8 @@ class Music(commands.Cog):
                                                    "the default whenever a new session occurs, or don't provide a "
                                                    "parameter to reset to default manually. Note that this affects "
                                                    "everyone on the server, if you want to only turn it quieter for "
-                                                   "you, use your client side volume controls.")
+                                                   "you, use your client side volume controls.",
+                      usage="<percentage>")
     @commands.guild_only()
     async def volume(self, ctx, *, volume: float = 0.5):
         vc = ctx.voice_client
@@ -339,7 +340,8 @@ class Music(commands.Cog):
         vc.stop()
         await ctx.message.reply("**Force Skipped!**")
 
-    @commands.command(brief="Play a song immediately", help="Skip the current song play this instead", aliases=['ps'])
+    @commands.command(brief="Play a song immediately", help="Skip the current song play this instead", aliases=['ps'],
+                      usage="<youtube url>")
     @commands.guild_only()
     @commands.has_guild_permissions(manage_messages=True)
     async def playskip(self, ctx, *, url):

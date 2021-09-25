@@ -66,7 +66,7 @@ class Utility(commands.Cog):
         }
 
         em = nextcord.Embed(title=g.name, description=g.description, colour=self.bot_config["embed_colour"])
-        em.set_author(name="Server Owner: {}#{}".format(g.owner.name, g.owner.discriminator),
+        em.set_author(name="Server Owner: {}".format(str(g.owner)),
                       icon_url=g.owner.display_avatar.url)
         if g.icon is not None:
             em.set_thumbnail(url=g.icon.url)
@@ -84,7 +84,7 @@ class Utility(commands.Cog):
     async def userinfo(self, ctx, user: nextcord.User):
         em = nextcord.Embed(colour=self.bot_config["embed_colour"])
         em.set_thumbnail(url=user.display_avatar.url)
-        em.set_author(name=user.name + '#' + user.discriminator, icon_url=user.display_avatar.url)
+        em.set_author(name=str(user), icon_url=user.display_avatar.url)
         em.add_field(name="ID", value=str(user.id))
         em.add_field(name="Created At", value=user.created_at.strftime("%Y-%m-%d %H:%M:%S.%f UTC"))
         em.add_field(name="Bot", value=user.bot)
@@ -96,7 +96,7 @@ class Utility(commands.Cog):
     async def memberinfo(self, ctx, member: nextcord.Member):
         em = nextcord.Embed(description=member.mention, colour=self.bot_config["embed_colour"])
         em.set_thumbnail(url=member.display_avatar.url)
-        em.set_author(name=member.name + '#' + member.discriminator, icon_url=member.display_avatar.url)
+        em.set_author(name=str(member), icon_url=member.display_avatar.url)
         fields = {
             "Nickname": member.nick,
             "ID": member.id,
@@ -128,7 +128,7 @@ class Utility(commands.Cog):
                       help="Send animated emojis in your message without nitro. Replace the location you want the "
                            "emote with :emote name here:. You should only use this if you don't have nitro, or it'll "
                            "probably mess up with Discord's autocomplete. For example: Hello :animated wave:.",
-                      aliases=["ae"])
+                      aliases=["ae"], usage="<message>")
     @commands.guild_only()
     async def animatedemoji(self, ctx, *, message):
         def similar(a, b):
@@ -152,7 +152,7 @@ class Utility(commands.Cog):
         webhook = await get_webhook(ctx, self.client)
         await webhook.send(content=new_str, username=ctx.author.display_name, avatar_url=ctx.author.display_avatar.url)
 
-    @commands.command(brief="Send a message as another user (to impersonate them)")
+    @commands.command(brief="Send a message as another user (to impersonate them)", usage="<user> <message>")
     @commands.guild_only()
     async def impersonate(self, ctx, user: nextcord.User, *, message):
         await ctx.message.delete()
@@ -237,7 +237,7 @@ class Utility(commands.Cog):
         if len(new_message) > 4096:
             return await ctx.send("New message too long", delete_after=15)
         em = nextcord.Embed(description=new_message)
-        em.set_author(name=ctx.author.name + "#" + ctx.author.discriminator, icon_url=ctx.author.display_avatar.url)
+        em.set_author(name=str(ctx.author), icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=em)
 
         if delete_originals:
@@ -249,12 +249,13 @@ class Utility(commands.Cog):
                                                                  "is put your text as the description in an embed, so "
                                                                  "you can use any other formatting embeds have. If you "
                                                                  "want a more advanced command, try the embedgen "
-                                                                 "command.", aliases=["embeddescription", "ed", "h"])
+                                                                 "command.", aliases=["embeddescription", "ed", "h"],
+                      usage="<message>")
     @commands.guild_only()
     async def hyperlink(self, ctx, *, message):
         await ctx.message.delete()
         em = nextcord.Embed(description=message)
-        em.set_author(name=ctx.author.name + "#" + ctx.author.discriminator, icon_url=ctx.author.display_avatar.url)
+        em.set_author(name=str(ctx.author), icon_url=ctx.author.display_avatar.url)
 
         await ctx.send(embed=em)
 

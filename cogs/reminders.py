@@ -74,7 +74,7 @@ class Reminders(commands.Cog):
                 continue
             self.reminders[r.original_message.id] = r
             logging.info("Incomplete reminder '{}' by {} added to reminder list after restart".format(
-                r.message, r.member.name + "#" + r.member.discriminator))
+                r.message, str(r.member)))
         asyncio.get_event_loop().create_task(self.check_reminders())
 
     @commands.command(brief="Remind you of something later",

@@ -12,7 +12,7 @@ class Alias(commands.Cog):
         self.server_config = server_config
         self.user_config = user_config
 
-    @commands.command(brief="Call upon an alias", aliases=["a"])
+    @commands.command(brief="Call upon an alias", aliases=["a"], usage="<alias>")
     @commands.guild_only()
     async def alias(self, ctx, *, name):
         name = name.lower()
@@ -39,7 +39,7 @@ class Alias(commands.Cog):
         em.set_author(name="{}alias {}".format(ctx.clean_prefix, name))
         await ctx.send(embed=em)
 
-    @commands.command(brief="Remove a message alias")
+    @commands.command(brief="Remove a message alias", usage="<alias>")
     @commands.guild_only()
     @commands.has_guild_permissions(manage_messages=True)
     async def removealias(self, ctx, *, name):
