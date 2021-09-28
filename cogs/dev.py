@@ -89,8 +89,8 @@ class Dev(commands.Cog):
             output = output.replace("<!@", "<!@\u200B")  # Zero-width space
 
         if ESCAPE_REGEX.findall(output):
-            r = requests.post(self.bot_config["hastebin_url"] + "documents", data=original_output.encode("utf-8"))
-            paste_link = self.bot_config["hastebin_url"] + r.json()["key"] if r.ok else None
+            r = requests.post(self.bot_config["hastebin"] + "documents", data=original_output.encode("utf-8"))
+            paste_link = self.bot_config["hastebin"] + r.json()["key"] if r.ok else None
             return "Code block escape attempt detected; will not output result", paste_link
 
         truncated = False
@@ -112,8 +112,8 @@ class Dev(commands.Cog):
             output = f"{output[:1000]}\n... (truncated - too long)"
 
         if truncated:
-            r = requests.post(self.bot_config["hastebin_url"] + "documents", data=original_output.encode("utf-8"))
-            paste_link = self.bot_config["hastebin_url"] + r.json()["key"] if r.ok else None
+            r = requests.post(self.bot_config["hastebin"] + "documents", data=original_output.encode("utf-8"))
+            paste_link = self.bot_config["hastebin"] + r.json()["key"] if r.ok else None
 
         output = output or "[No Output]"
 

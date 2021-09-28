@@ -12,7 +12,7 @@ default_bot_config = {
     "prefix": "!",
     "embed_colour": 7857407,
     "snekbox": "",
-    "hastebin_url": "https://hastebin.com/"
+    "hastebin": "https://hastebin.com/"
 }
 
 def assert_data():
