@@ -11,7 +11,8 @@ default_bot_config = {
     "status": "!help",
     "prefix": "!",
     "embed_colour": 7857407,
-    "snekbox": ""
+    "snekbox": "",
+    "hastebin_url": "https://hastebin.com/"
 }
 
 def assert_data():

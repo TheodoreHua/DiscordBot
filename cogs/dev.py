@@ -72,8 +72,7 @@ class Dev(commands.Cog):
         code = textwrap.dedent(code)
         return code
 
-    @staticmethod
-    async def format_output(output: str):
+    async def format_output(self, output: str):
         """
         Format the output and return a tuple of the formatted output and a URL to the full output.
         Prepend each line with a line number. Truncate if there are over 10 lines or 1000 characters
@@ -90,8 +89,8 @@ class Dev(commands.Cog):
             output = output.replace("<!@", "<!@\u200B")  # Zero-width space
 
         if ESCAPE_REGEX.findall(output):
-            r = requests.post("https://hastebin.blankdvth.com/documents", data=original_output.encode("utf-8"))
-            paste_link = "https://hastebin.blankdvth.com/" + r.json()["key"] if r.ok else None
+            r = requests.post(self.bot_config["hastebin_url"] + "documents", data=original_output.encode("utf-8"))
+            paste_link = self.bot_config["hastebin_url"] + r.json()["key"] if r.ok else None
             return "Code block escape attempt detected; will not output result", paste_link
 
         truncated = False
@@ -113,8 +112,8 @@ class Dev(commands.Cog):
             output = f"{output[:1000]}\n... (truncated - too long)"
 
         if truncated:
-            r = requests.post("https://hastebin.blankdvth.com/documents", data=original_output.encode("utf-8"))
-            paste_link = "https://hastebin.blankdvth.com/" + r.json()["key"] if r.ok else None
+            r = requests.post(self.bot_config["hastebin_url"] + "documents", data=original_output.encode("utf-8"))
+            paste_link = self.bot_config["hastebin_url"] + r.json()["key"] if r.ok else None
 
         output = output or "[No Output]"
 

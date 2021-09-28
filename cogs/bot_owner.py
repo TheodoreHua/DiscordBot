@@ -53,8 +53,8 @@ class BotOwner(commands.Cog):
         proc = await asyncio.create_subprocess_shell("venv/bin/python -m pip install -r requirements.txt",
                                                      stdout=asyncio.subprocess.PIPE)
         stdout, stderr = await proc.communicate()
-        r = requests.post("https://hastebin.blankdvth.com/documents", data=stdout)
-        paste_link = "https://hastebin.blankdvth.com/" + r.json()["key"] if r.ok else None
+        r = requests.post(self.bot_config["hastebin_url"] + "/documents", data=stdout)
+        paste_link = self.bot_config["hastebin_url"] + r.json()["key"] if r.ok else None
         await ctx.send("{}\n```\n{}\n```".format(paste_link, stdout.decode()[-1900:]))
 
     @commands.command(hidden=True)
