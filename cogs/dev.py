@@ -136,7 +136,7 @@ class Dev(commands.Cog):
                 output, paste_link = await self.format_output(results["stdout"])
 
             if not results["stdout"].strip():  # No output
-                icon = ":warning"
+                icon = ":warning:"
             elif results["returncode"] == 0:  # No error
                 icon = ":white_check_mark:"
             else:  # Exception
