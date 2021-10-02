@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 from difflib import SequenceMatcher
 from os import environ, getenv
 from traceback import format_tb
@@ -70,7 +71,8 @@ async def on_command_error(ctx, error):
             await ctx.send("**Command Not Found**: Did you mean `{}`?".format(highest_command[1]))
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(
-            "This command is on cooldown, try again in **{}** seconds".format(str(error.retry_after)))
+            "This command is on cooldown, try again in **{}**.".format(str(timedelta(seconds=error.retry_after))
+                                                                       .split(".")[0]))
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("**Missing Permissions**: You need `{}`."
                        .format(", ".join(x.replace("_", " ").title() for x in error.missing_permissions)))

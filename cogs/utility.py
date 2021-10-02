@@ -345,3 +345,12 @@ class Utility(commands.Cog):
                                                                        i["definition"]) for i in results],
                                     last_page=len(results), title=term, timeout=120)
                 await msg.edit(None, embed=v.generate_embed(), view=v)
+
+    @commands.command(aliases=["paste", "pastebin", "haste", "uploadtext"], brief="Upload text to hastebin",
+                      usage="<text>")
+    @commands.cooldown(2, 60)
+    async def hastebin(self, ctx, *, text):
+        r = requests.post(self.bot_config["hastebin"] + "documents", data=text.strip().encode("utf-8"))
+        if not r.ok:
+            return await ctx.reply("Error occurred while attempting to upload to hastebin, try again later")
+        await ctx.reply(self.bot_config["hastebin"] + r.json()["key"])
