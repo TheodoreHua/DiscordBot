@@ -374,7 +374,7 @@ class Utility(commands.Cog):
                       help="Convert date time, date, or just time (with timezones) to a Discord timestamp. See the "
                            "[discord api docs]"
                            "(https://discord.com/developers/docs/reference#message-formatting-timestamp-styles) for "
-                           "format options.", usage="[format] <timestamp>")
+                           "format options.", usage="[format] <timestamp>", aliases=["ts"])
     async def timestamp(self, ctx, frmt: typing.Optional[TimestampFormatConverter] = "", *, timestamp):
         parsed = dateparser.parse(timestamp)
         if parsed is None:
