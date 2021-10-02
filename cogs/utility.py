@@ -1,3 +1,4 @@
+import logging
 import random
 import re
 from difflib import SequenceMatcher
@@ -8,7 +9,9 @@ from nextcord.ext import commands
 from typed_flags import TypedFlags
 
 from helpers.funcs import cut_mentions, get_webhook
+from helpers.views import IndividualPager
 
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
 
 class Utility(commands.Cog):
     def __init__(self, client, bot_config, server_config, user_config):
@@ -308,3 +311,37 @@ class Utility(commands.Cog):
             return await ctx.send("Invalid value in embed, couldn't send it", delete_after=15)
         webhook = await get_webhook(ctx, self.client)
         await webhook.send(embed=em, username=ctx.author.display_name, avatar_url=ctx.author.display_avatar.url)
+
+    @commands.command(brief="Search urban dictionary", help="Search for a term on urban dictionary and get the results",
+                      usage="<term>", aliases=["ud"])
+    async def urbandictionary(self, ctx, *, term):
+        try:
+            r = requests.get("https://mashape-community-urban-dictionary.p.rapidapi.com/define", headers={
+                "x-rapidapi-host": "mashape-community-urban-dictionary.p.rapidapi.com",
+                "x-rapidapi-key": self.bot_config["ud_rapidapi_key"]
+            }, params={"term": term})
+        except ConnectionError:
+            logging.exception("Received error while attempting urban dictionary command")
+            return await ctx.send("An error occurred, try again later.")
+        if not r.ok:
+            return await ctx.send("Error retrieving response from Urban Dictionary, try again later.")
+        else:
+            results = r.json()["list"]
+            if len(results) == 0:
+                return await ctx.send("No results found")
+            elif len(results) == 1:
+                em = nextcord.Embed(title=results[0]["word"], description=results[0]["definition"],
+                                    colour=self.bot_config["embed_colour"])
+                em.set_author(name=results[0]["author"])
+                em.add_field(name="Example", value=results[0]["example"], inline=False)
+                em.add_field(name="Thumbs Up", value="{:,}".format(results[0]["thumbs_up"]))
+                em.add_field(name="Thumbs Down", value="{:,}".format(results[0]["thumbs_down"]))
+                em.add_field(name="Link", value="[{}]({})".format(results[0]["word"], results[0]["permalink"]))
+                await ctx.send(embed=em)
+            else:
+                msg = await ctx.send("Processing...")
+                v = IndividualPager(ctx, msg, 1, [
+                    "**Word**: [{}]({})\n**Author**: `{}`\n\n{}".format(i["word"], i["permalink"], i["author"],
+                                                                       i["definition"]) for i in results],
+                                    last_page=len(results), title=term, timeout=120)
+                await msg.edit(None, embed=v.generate_embed(), view=v)

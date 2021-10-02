@@ -105,6 +105,16 @@ class GenericPager(nextcord.ui.View):
     async def last(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.resp(interaction, self.last_page)
 
+
+class IndividualPager(GenericPager):
+    def generate_embed(self):
+        em = nextcord.Embed(title=self.title, description=self.entries[self.page - 1],
+                            colour=nextcord.Colour.random())
+        em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
+                      icon_url=self.ctx.author.display_avatar.url)
+        return em
+
+
 # noinspection PyUnusedLocal
 class MusicQueuePager(GenericPager):
     def __init__(self, page, last_page, pages, current_song, ctx, msg, total_duration):

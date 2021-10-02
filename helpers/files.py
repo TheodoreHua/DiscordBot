@@ -12,7 +12,8 @@ default_bot_config = {
     "prefix": "!",
     "embed_colour": 7857407,
     "snekbox": "",
-    "hastebin": "https://hastebin.com/"
+    "hastebin": "https://hastebin.com/",
+    "ud_rapidapi_key": ""
 }
 
 def assert_data():
