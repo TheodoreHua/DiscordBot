@@ -1,4 +1,5 @@
 import logging
+import typing
 import random
 import re
 from difflib import SequenceMatcher
@@ -157,7 +158,7 @@ class Utility(commands.Cog):
 
     @commands.command(brief="Send a message as another user (to impersonate them)", usage="<user> <message>")
     @commands.guild_only()
-    async def impersonate(self, ctx, user: nextcord.User, *, message):
+    async def impersonate(self, ctx, user: typing.Union[nextcord.Member, nextcord.User], *, message):
         await ctx.message.delete()
 
         webhook = await get_webhook(ctx, self.client)
