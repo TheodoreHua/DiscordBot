@@ -5,3 +5,4 @@ pyparsing~=2.4.7
 requests~=2.26.0
 minesweeperPy~=1.8
 youtube-dl~=2021.6.6
+dateparser~=1.0.0

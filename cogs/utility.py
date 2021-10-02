@@ -1,9 +1,11 @@
 import logging
-import typing
 import random
 import re
+import typing
+from datetime import datetime
 from difflib import SequenceMatcher
 
+import dateparser
 import nextcord
 import requests
 from nextcord.ext import commands
@@ -13,6 +15,18 @@ from helpers.funcs import cut_mentions, get_webhook
 from helpers.views import IndividualPager
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
+
+
+class TimestampFormatConverter(commands.Converter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.styles = ['t', 'T', 'd', 'D', 'f', 'F', 'R']
+
+    async def convert(self, ctx, argument):
+        if argument not in self.styles:
+            raise commands.BadArgument
+        return ":" + argument
+
 
 class Utility(commands.Cog):
     def __init__(self, client, bot_config, server_config, user_config):
@@ -343,7 +357,7 @@ class Utility(commands.Cog):
                 msg = await ctx.send("Processing...")
                 v = IndividualPager(ctx, msg, 1, [
                     "**Word**: [{}]({})\n**Author**: `{}`\n\n{}".format(i["word"], i["permalink"], i["author"],
-                                                                       i["definition"]) for i in results],
+                                                                        i["definition"]) for i in results],
                                     last_page=len(results), title=term, timeout=120)
                 await msg.edit(None, embed=v.generate_embed(), view=v)
 
@@ -355,3 +369,18 @@ class Utility(commands.Cog):
         if not r.ok:
             return await ctx.reply("Error occurred while attempting to upload to hastebin, try again later")
         await ctx.reply(self.bot_config["hastebin"] + r.json()["key"])
+
+    @commands.command(brief="Send a timestamp",
+                      help="Convert date time, date, or just time (with timezones) to a Discord timestamp. See the "
+                           "[discord api docs]"
+                           "(https://discord.com/developers/docs/reference#message-formatting-timestamp-styles) for "
+                           "format options.", usage="[format] <timestamp>")
+    async def timestamp(self, ctx, frmt: typing.Optional[TimestampFormatConverter] = "", *, timestamp):
+        parsed = dateparser.parse(timestamp)
+        if parsed is None:
+            return await ctx.send("Unable to parse given timestamp, try a more standard format")
+        else:
+            ts = "<t:{}{}>".format(int(datetime.timestamp(parsed)), frmt)
+            return await ctx.send("{0} (to use it in chat, enter `{0}` where you want it). The preview at the front of "
+                                  "the message should be the timestamp in your local time, if it doesn't match up with "
+                                  "what you expect, try again with a different format.".format(ts))
