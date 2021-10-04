@@ -1,5 +1,3 @@
-from math import ceil
-
 import nextcord
 from nextcord.ext import commands
 
