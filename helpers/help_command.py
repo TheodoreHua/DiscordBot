@@ -1,9 +1,11 @@
 import itertools
+from re import sub
 
 import nextcord
 from nextcord.ext.commands import Group, HelpCommand
 
 from helpers.views import GenericPager, HelpPager
+
 
 class BotHelp(HelpCommand):
     def __init__(self, bot_config, **options):
@@ -27,11 +29,13 @@ class BotHelp(HelpCommand):
             self.f[heading].append(entry)
 
     async def send(self):
+        """Send a help pager"""
         msg = await self.get_destination().send("Processing...")
         view = HelpPager(self.context, msg, 1, self.f, title="Help", ipp=25, description=self.bot_config["description"])
         await msg.edit(None, embed=view.generate_embed(), view=view)
 
     async def command_callback(self, ctx, *, command=None):
+        """Prepare and generate the help command"""
         await self.prepare_help_command(ctx, command)
         bot = ctx.bot
 
@@ -84,8 +88,8 @@ class BotHelp(HelpCommand):
     async def send_command_help(self, command):
         usg = "{}{} {}".format(self.context.clean_prefix, command.name, command.usage or "")
         em = nextcord.Embed(title=usg if len(usg) <= 256 else nextcord.Embed.Empty,
-                            description=("`{}`\n\n".format(usg) if len(usg) > 256 else "") +
-                                        (command.help or command.brief or ""), colour=nextcord.Colour.random())
+                            description=("`{}`\n\n".format(usg) if len(usg) > 256 else "") + sub(r"(?<!\n)\n(?!\n)", " ", command.help or command.brief or ""),
+                            colour=nextcord.Colour.random())
         em.add_field(name="Category", value=command.cog_name if command.cog_name is not None else "Uncategorized")
         if len(command.aliases) > 0:
             em.add_field(name="Command Aliases", value=", ".join(["`{}`".format(i) for i in command.aliases]))

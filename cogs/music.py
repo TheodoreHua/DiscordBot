@@ -145,6 +145,7 @@ class Music(commands.Cog):
         return player
 
     async def handle_join(self, ctx: commands.Context):
+        """Join a voice channel"""
         if ctx.voice_client is None:
             if ctx.author.voice is None:
                 await ctx.message.reply("You are not in a voice channel")
@@ -158,6 +159,7 @@ class Music(commands.Cog):
                 return
 
     async def cleanup(self, guild):
+        """Disconnect from and clean up a guild"""
         player = self.q[guild.id]
         player.playing = False
         try:
@@ -171,6 +173,10 @@ class Music(commands.Cog):
 
     @staticmethod
     async def get_data(url):
+        """Get the YTDL data associated with a URL
+
+        :param str url: URL to query for
+        """
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False, process=False))
         if data is None:
@@ -180,6 +186,7 @@ class Music(commands.Cog):
     @commands.command(brief="Play a song or playlist from YouTube", aliases=['p'], usage="<youtube url>")
     @commands.guild_only()
     async def play(self, ctx, *, url):
+        """Play a song from YouTube in VC, playlists are not currently supported."""
         if await self.handle_join(ctx) is None:
             return
         await ctx.send("**Joined** `{}`".format(ctx.author.voice.channel.name))
@@ -215,6 +222,8 @@ class Music(commands.Cog):
     @commands.command(brief="Pause the current song")
     @commands.guild_only()
     async def pause(self, ctx):
+        """Pause the player, note that this will also pause the bot's automatic idle leaving, so make sure to either
+        unpause it or run the leave command when you no longer need the music bot."""
         vc = ctx.voice_client
         if not vc or not vc.is_playing():
             return await ctx.send("I'm not currently playing anything")
@@ -227,6 +236,7 @@ class Music(commands.Cog):
     @commands.command(brief="Resume the currently paused song", aliases=['unpause'])
     @commands.guild_only()
     async def resume(self, ctx):
+        """Resume the player"""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -239,6 +249,7 @@ class Music(commands.Cog):
     @commands.command(brief="Leave the VC", aliases=["stop"])
     @commands.guild_only()
     async def leave(self, ctx: commands.Context):
+        """Have the bot leave the VC and cleanup any settings (queue and volume will reset)"""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -250,15 +261,13 @@ class Music(commands.Cog):
         await self.cleanup(ctx.guild)
         await ctx.message.reply("Left `{}`".format(oc))
 
-    @commands.command(brief="Set the volume", help="Set the volume of the music player, may take a couple seconds to "
-                                                   "take effect. This only affects the current session, it'll reset to "
-                                                   "the default whenever a new session occurs, or don't provide a "
-                                                   "parameter to reset to default manually. Note that this affects "
-                                                   "everyone on the server, if you want to only turn it quieter for "
-                                                   "you, use your client side volume controls.",
-                      usage="<percentage>")
+    @commands.command(brief="Set the volume", usage="<percentage>")
     @commands.guild_only()
     async def volume(self, ctx, *, volume: float = 0.5):
+        """Set the volume of the music player, may take a couple seconds to take effect. This only affects the current
+        session, it'll reset to the default whenever a new session occurs, or don't provide a parameter to reset to
+        default manually. Note that this affects everyone on the server, if you want to only turn it quieter for you,
+        use your client side volume controls."""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -274,6 +283,7 @@ class Music(commands.Cog):
     @commands.command(brief="Shuffle the queue")
     @commands.guild_only()
     async def shuffle(self, ctx):
+        """Shuffle the queue, this does not change the currently playing song. You'll have to skip it."""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -287,6 +297,7 @@ class Music(commands.Cog):
     @commands.command(brief="Clear the queue")
     @commands.guild_only()
     async def clear(self, ctx):
+        """Clear the queue, this does not stop the currently playing song. You'll have to skip it."""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -300,6 +311,8 @@ class Music(commands.Cog):
     @commands.command(brief="Skip the song", aliases=['s'])
     @commands.guild_only()
     async def skip(self, ctx):
+        """Vote to skip the current song, if there are more than 2 people on the VC, you'll need at least half to vote
+        to skip"""
         vc = ctx.voice_client
         bm = ctx.guild.get_member(self.client.user.id)
         if not vc or not vc.is_connected():
@@ -329,6 +342,7 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
     async def forceskip(self, ctx):
+        """Forcefully skip the current song, without voting"""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -340,11 +354,11 @@ class Music(commands.Cog):
         vc.stop()
         await ctx.message.reply("**Force Skipped!**")
 
-    @commands.command(brief="Play a song immediately", help="Skip the current song play this instead", aliases=['ps'],
-                      usage="<youtube url>")
+    @commands.command(brief="Play a song immediately", aliases=['ps'], usage="<youtube url>")
     @commands.guild_only()
     @commands.has_guild_permissions(manage_messages=True)
     async def playskip(self, ctx, *, url):
+        """Skip the current song and play this one instead"""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -367,10 +381,11 @@ class Music(commands.Cog):
                 vc.stop()
             await ctx.message.reply("**Skipped current song to play** `{}` **instead**".format(p['title']))
 
-    @commands.command(brief="Rickroll yourself", help="You found an easter egg! Skip the current song and play a "
-                                                      "rickroll next instead.", hidden=True)
+    @commands.command(brief="Rickroll yourself", hidden=True)
     @commands.guild_only()
+    @commands.cooldown(1, 600)
     async def rickroll(self, ctx):
+        """You found an easter egg! Skip the current song and play a rickroll instead."""
         await ctx.message.delete()
         if await self.handle_join(ctx) is None:
             return
@@ -386,6 +401,7 @@ class Music(commands.Cog):
     @commands.command(brief="See information about the current song", aliases=['np', 'current'])
     @commands.guild_only()
     async def nowplaying(self, ctx):
+        """Show information about the currently playing song"""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")
@@ -403,6 +419,7 @@ class Music(commands.Cog):
     @commands.command(brief="See the queue of songs", aliases=['q'])
     @commands.guild_only()
     async def queue(self, ctx):
+        """Get a list of all songs currently in the queue"""
         vc = ctx.voice_client
         if not vc or not vc.is_connected():
             return await ctx.send("I'm not connected to a VC")

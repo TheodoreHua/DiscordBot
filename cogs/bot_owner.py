@@ -19,7 +19,8 @@ class BotOwner(commands.Cog):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def setstatus(self, ctx, *, status):
-        await ctx.message.delete()
+        if ctx.guild is not None:
+            await ctx.message.delete()
         await self.client.change_presence(status=nextcord.Status.online,
                                           activity=nextcord.Game(status if status != "reset"
                                                                  else self.bot_config["status"]))
@@ -29,13 +30,15 @@ class BotOwner(commands.Cog):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def say(self, ctx, *, message):
-        await ctx.message.delete()
+        if ctx.guild is not None:
+            await ctx.message.delete()
         await ctx.send(message)
 
     @commands.command(hidden=True)
     @commands.is_owner()
     async def spam(self, ctx, number: int, *, message):
-        await ctx.message.delete()
+        if ctx.guild is not None:
+            await ctx.message.delete()
         for _ in range(number):
             await ctx.send(message)
             await asyncio.sleep(1)
@@ -43,7 +46,8 @@ class BotOwner(commands.Cog):
     @commands.command(hidden=True)
     @commands.is_owner()
     async def fastspam(self, ctx, number: int, *, message):
-        await ctx.message.delete()
+        if ctx.guild is not None:
+            await ctx.message.delete()
         for _ in range(number):
             await ctx.send(message)
 

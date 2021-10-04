@@ -38,23 +38,38 @@ class ServerConfig:
             json.dump(self.__config__, f, indent=2)
 
     def get_prefix(self, client, message):
-        """Method to be passed to a commands.Bot instance in order to dynamically generate a prefix per server"""
+        """Method to be passed to a commands.Bot instance in order to dynamically generate a prefix per server
+
+        :param client: Unused parameter provided by Discord
+        :param nextcord.Message message: Message object associated with the prefix request
+        :return: Bot prefix for the provided object
+        :rtype: str
+        """
         if message.guild is None:
             return self.defaults["prefix"]
         return self.__config__[str(message.guild.id)]["prefix"]
 
     def add_guild(self, guild):
-        """Method to add a guild once invited"""
+        """Method to add a guild once invited
+
+        :param nextcord.Guild guild: Guild to add
+        """
         self.__config__[str(guild.id)] = self.defaults
         logging.info("Added guild {} ({}) to guild config".format(guild.name, guild.id))
 
     def remove_guild(self, guild):
-        """Method to remove a guild once kicked"""
+        """Method to remove a guild once kicked
+
+        :param nextcord.Guild guild: Guild to remove
+        """
         del self.__config__[str(guild.id)]
         logging.info("Added guild {} ({}) to guild config".format(guild.name, guild.id))
 
     def check_servers(self, guilds):
-        """Method to check all servers the bot is present in is in the config"""
+        """Method to check all servers the bot is present in is in the config
+
+        :param list guilds: List of guilds to check through
+        """
         w = False
         for guild in guilds:
             if str(guild.id) not in self.__config__.keys():
@@ -92,10 +107,12 @@ class UserConfig:
         return len(self.__config__)
 
     def write_config(self):
+        """Write the current config to file"""
         with open("data/user_config.json", "w") as f:
             json.dump(self.__config__, f, indent=2)
 
     def check_values(self):
+        """Check the values of the current config"""
         w = False
         for d in self.defaults:
             if d not in self.__config__:

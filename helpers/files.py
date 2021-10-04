@@ -17,7 +17,7 @@ default_bot_config = {
 }
 
 def assert_data():
-    # Basic checks to see if the directory and files exist
+    """Basic checks to make sure required directories and files exist"""
     if not isdir("data"):
         mkdir("data")
     if not isfile("data/bot_config.json"):

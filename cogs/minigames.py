@@ -24,6 +24,7 @@ class Minigames(commands.Cog):
 
     @commands.command(brief="Play a game of rock paper scissors", aliases=["rps"])
     async def rockpaperscissors(self, ctx):
+        """Play rock paper scissors with the bot, not much more to it"""
         view = RpsChoice(ctx.author.id)
         msg = await ctx.send("Choose your hand", view=view)
         if await view.wait():
@@ -48,6 +49,8 @@ class Minigames(commands.Cog):
 
     @commands.command(brief="Play a game of hangman")
     async def hangman(self, ctx, lives: int = 6):
+        """Play a game of hangman, the words are picked from a
+        [list of commonish words](https://raw.githubusercontent.com/bevacqua/correcthorse/master/wordlist.json)."""
         word = random.choice(
             requests.get("https://raw.githubusercontent.com/bevacqua/correcthorse/master/wordlist.json").json()).lower()
         guessed_letters = []
@@ -117,11 +120,10 @@ class Minigames(commands.Cog):
                                                 description="You ran out of lives, the word was `{}`".format(word),
                                                 colour=nextcord.Colour.dark_red()))
 
-    @commands.command(brief="Play a number guess game",
-                      help="Try to guess a number between a range, when you guess an incorrect number the "
-                           "bot will reply with too high or too low",
-                      aliases=["numberguess", "ng"])
+    @commands.command(brief="Play a number guess game", aliases=["numberguess", "ng"])
     async def numguess(self, ctx, lives: int = 8, upper_bound: int = 100):
+        """Try to guess a number between a range, when you guess an incorrect number the bot will tell you whether the
+        number is too high or too low"""
         num = random.randint(0, upper_bound)
         win, desc, col = False, None, None
 
@@ -181,9 +183,9 @@ class Minigames(commands.Cog):
                                                 description="You ran out of lives",
                                                 colour=nextcord.Colour.dark_red()))
 
-    @commands.command(brief="Send a minesweeper grid", help="Send a minesweeper grid, there is no win/lose logic, "
-                                                            "it's just a grid.")
+    @commands.command(brief="Send a minesweeper grid")
     async def minesweeper(self, ctx, difficulty="medium", grid_width: int = 5, grid_height: int = 5):
+        """Send a minesweeper grid, there is no win/lose logic, it's just a grid."""
         if grid_width > 12 or grid_height > 12:
             await ctx.send("The maximum size of the grid is 12 x 12")
         if grid_width < 5 or grid_height < 5:
@@ -213,6 +215,7 @@ class Minigames(commands.Cog):
 
     @commands.command(brief="Play a game of Tic Tac Toe", aliases=["ttt"])
     async def tictactoe(self, ctx, player: nextcord.Member):
+        """Play a game of Tic Tac Toe with another server member"""
         if player == ctx.author or player.bot:
             await ctx.send("You can't invite this player to a game!", delete_after=5)
             return

@@ -150,6 +150,8 @@ class Dev(commands.Cog):
     @commands.command(name="eval", aliases=["e"], brief="Run some Python code and get the results",
                       usage="<code>")
     async def _eval(self, ctx, *, code=None):
+        """Run your Python code and get the output of it, code will timeout after around 6 seconds, and you can run this
+        command one at a time (you have to wait for one to finish before you run another)."""
         if ctx.author.id in self.jobs:
             return await ctx.send("You already have an eval job running, please wait for it to finish")
         if not code:

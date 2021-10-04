@@ -35,9 +35,9 @@ class Utility(commands.Cog):
         self.server_config = server_config
         self.user_config = user_config
 
-    @commands.command(aliases=["pfp"], brief="Get a user's profile picture",
-                      help="Get a user's profile picture, or run the command by itself for your own profile picture.")
+    @commands.command(aliases=["pfp"], brief="Get a user's profile picture")
     async def avatar(self, ctx, user: nextcord.User = None):
+        """Get a user's profile picture, or run the command by itself for your own profile picture."""
         if user is None:
             user = ctx.message.author
         em = nextcord.Embed(description=user.mention + "'s Avatar", colour=self.bot_config["embed_colour"])
@@ -45,10 +45,10 @@ class Utility(commands.Cog):
 
         await ctx.send(embed=em)
 
-    @commands.command(brief="Roll some dice", help="Roll some dice, by default it'll be a 1d6 (one 6-sided die), "
-                                                   "however you can roll more dice with varying number of sides.",
-                      aliases=["roll"])
+    @commands.command(brief="Roll some dice", aliases=["roll"])
     async def dice(self, ctx, amount: int, sides: int):
+        """Roll some dice, by default it'll be a 1d6 (one 6-sided die), however you can roll more dice with varying
+        number of sides."""
         if amount > 100 or sides > 10000000000000000:
             await ctx.send("Woahhh, slow down there. That's too large, Discord can't handle it!")
             return
@@ -59,19 +59,21 @@ class Utility(commands.Cog):
         await ctx.send("**Result:** {}d{} ({})\n**Total**: {}".format(amount, sides, ", ".join(str(i) for i in rolled),
                                                                       sum(rolled)))
 
-    @commands.command(brief="Choose between a couple options",
-                      help="Provide a list of options for the bot to choose 1 out of seperated by spaces. For options"
-                           " with spaces in them, enclose it in double quotes.")
+    @commands.command(brief="Choose between a couple options")
     async def choose(self, ctx, *options):
+        """Provide a list of options for the bot to choose 1 out of seperated by spaces. For options with spaces in
+        them, enclose it in double quotes."""
         await ctx.send("I choose: `{}`".format(random.choice(options)))
 
     @commands.command(brief="Show the bots ping")
     async def ping(self, ctx):
+        """Show the bots ping, up to 4 decimal points"""
         await ctx.send("Pong! `{:,.4f}ms`".format(self.client.latency * 1000))
 
     @commands.command(brief="Show info about this server")
     @commands.guild_only()
     async def serverinfo(self, ctx):
+        """Show various information about the server the command is run in"""
         g = ctx.guild
         fields = {
             "ID": str(g.id),
@@ -98,8 +100,10 @@ class Utility(commands.Cog):
 
         await ctx.send(embed=em)
 
-    @commands.command(brief="Show info about a user", help="Show info about a user, not specific to this server")
+    @commands.command(brief="Show info about a user")
     async def userinfo(self, ctx, user: nextcord.User):
+        """Show general info about a user (doesn't have to be in the server). To see info specific to this server use
+        memberinfo"""
         em = nextcord.Embed(colour=self.bot_config["embed_colour"])
         em.set_thumbnail(url=user.display_avatar.url)
         em.set_author(name=str(user), icon_url=user.display_avatar.url)
@@ -109,9 +113,10 @@ class Utility(commands.Cog):
 
         await ctx.message.channel.send(embed=em)
 
-    @commands.command(brief="Show info about a member", help="Show info about a user/member, specific to this server")
+    @commands.command(brief="Show info about a member")
     @commands.guild_only()
     async def memberinfo(self, ctx, member: nextcord.Member):
+        """Show info about a member, specific to this server"""
         em = nextcord.Embed(description=member.mention, colour=self.bot_config["embed_colour"])
         em.set_thumbnail(url=member.display_avatar.url)
         em.set_author(name=str(member), icon_url=member.display_avatar.url)
@@ -142,13 +147,12 @@ class Utility(commands.Cog):
 
         await ctx.message.channel.send(embed=em)
 
-    @commands.command(brief="Send animated emojis in your message without nitro",
-                      help="Send animated emojis in your message without nitro. Replace the location you want the "
-                           "emote with :emote name here:. You should only use this if you don't have nitro, or it'll "
-                           "probably mess up with Discord's autocomplete. For example: Hello :animated wave:.",
-                      aliases=["ae"], usage="<message>")
+    @commands.command(brief="Send animated emojis in your message without nitro", aliases=["ae"], usage="<message>")
     @commands.guild_only()
     async def animatedemoji(self, ctx, *, message):
+        """Send animated emojis in your message without nitro. Replace the location you want the emote with :emote name
+        here:. You should only use this if you don't have nitro, or it'll probably mess up with Discord's autocomplete.
+        For example: Hello :animated wave:."""
         def similar(a, b):
             return SequenceMatcher(None, a, b).ratio()
 
@@ -173,18 +177,20 @@ class Utility(commands.Cog):
     @commands.command(brief="Send a message as another user (to impersonate them)", usage="<user> <message>")
     @commands.guild_only()
     async def impersonate(self, ctx, user: typing.Union[nextcord.Member, nextcord.User], *, message):
+        """Impersonate another user with the power of webhooks! Basically this allows you to send a message with another
+         user's profile picture and name, note that the role colour WILL be white and there'll be a bot tag, there's
+          nothing I can do about that as it's just how it works."""
         await ctx.message.delete()
 
         webhook = await get_webhook(ctx, self.client)
         await webhook.send(content=message, username=user.display_name, avatar_url=user.display_avatar.url)
 
     @commands.command(brief="Send a message as a custom user",
-                      help="Send a message as a custom user, basically a one-time-use Tupper (if you know what I'm "
-                           "talking about). Username and message flags are required, avatar is optional (you can also "
-                           "upload an avatar as a file).",
                       usage="<message> --username:=<username> --avatar:=[avatar url]")
     @commands.guild_only()
     async def usersend(self, ctx, *, args: TypedFlags):
+        """Send a message as a custom user, basically a one-time-use Tupper (if you know what I'm talking about).
+        Username and message flags are required, avatar is optional (you can also upload an avatar as a file)."""
         await ctx.message.delete()
         if "username" not in args or None not in args:
             raise commands.BadArgument()
@@ -212,6 +218,7 @@ class Utility(commands.Cog):
 
     @commands.command(brief="Get information about a Minecraft player")
     async def playerinfo(self, ctx, player):
+        """Get various information about a Minecraft player, including their current skin, username history, and UUID"""
         r = requests.get("https://api.mojang.com/users/profiles/minecraft/" + player)
         if r.ok and r.status_code not in [204, 400]:
             js = r.json()
@@ -244,12 +251,11 @@ class Utility(commands.Cog):
         e.add_field(name="UUID", value=uuid)
         await ctx.send(embed=e)
 
-    @commands.command(brief="Send longer messages", help="Combine two existing 2000 character messages into one 4000 "
-                                                         "character message. By default the original 2 messages "
-                                                         "are not deleted, you can pass an extra bool value to delete "
-                                                         "them.", aliases=["combinemessage", "cm"])
+    @commands.command(brief="Send longer messages", aliases=["combinemessage", "cm"])
     @commands.guild_only()
     async def messagecombine(self, ctx, msg1: nextcord.Message, msg2: nextcord.Message, delete_originals: bool = False):
+        """Combine two existing 2000 character messages into one 4000 character message. By default the original 2
+        messages are not deleted, you can pass an extra bool value to delete them."""
         await ctx.message.delete()
         new_message = msg1.content + "\n" + msg2.content
         if len(new_message) > 4096:
@@ -262,15 +268,13 @@ class Utility(commands.Cog):
             await msg1.delete()
             await msg2.delete()
 
-    @commands.command(brief="Send hyperlinks using embeds", help="Send hyperlinks using embeds, hyperlinks have to be "
-                                                                 "in the format `[text](link)`. All this really does "
-                                                                 "is put your text as the description in an embed, so "
-                                                                 "you can use any other formatting embeds have. If you "
-                                                                 "want a more advanced command, try the embedgen "
-                                                                 "command.", aliases=["embeddescription", "ed", "h"],
+    @commands.command(brief="Send hyperlinks using embeds", aliases=["embeddescription", "ed", "h"],
                       usage="<message>")
     @commands.guild_only()
     async def hyperlink(self, ctx, *, message):
+        """Send hyperlinks using embeds, hyperlinks have to be in the format `[text](link)`. All this really does is put
+        your text as the description in an embed, so you can use any other formatting embeds have. If you want a more
+        advanced command, try the `embedgen` command."""
         await ctx.message.delete()
         em = nextcord.Embed(description=message)
         em.set_author(name=str(ctx.author), icon_url=ctx.author.display_avatar.url)
@@ -278,21 +282,20 @@ class Utility(commands.Cog):
         await ctx.send(embed=em)
 
     @commands.command(brief="Send a custom embed", aliases=["embedgen", "eg"],
-                      help="Send your own custom embed, all embed options are available under flags (as seen in the "
-                           "usage help). You can define your own custom fields by using flags as well, you just can't "
-                           "name them anything that already exists. For example the flag `--Test Field:=Something` "
-                           "would result in a field named `Test Field` with a value of `Something` Keep in mind "
-                           "Discord embed limits, they apply. If you don't know the type of value you have to pass into "
-                           "certain options, you're going to run into issues. That's why it's recommended to leave "
-                           "this for people who know what they're doing. One very common one is colour, it has to be "
-                           "in decimal form, not hex. Some image arguments only work if their text is defined, for "
-                           "example `footer_icon_url` only works if `footer_text` is defined.",
                       usage="--title:=[title] --description:=[description] --colour:=[colour in decimal format] "
                             "--url:=[title url] --footer_text:=[footer text] --footer_icon_url:=[footer icon url] "
                             "--image:=[image] --thumbnail:=[thumbnail] --author_name:=[author name] "
                             "--author_icon_url:=[author icon url] --author_url:=[author url]")
     @commands.guild_only()
     async def embed(self, ctx, *, args: TypedFlags):
+        """Send your own custom embed, all embed options are available under flags (as seen in the usage help). You can
+        define your own custom fields by using flags as well, you just can't name them anything that already exists. For
+        example the flag `--Test Field:=Something` would result in a field named `Test Field` with a value of
+        `Something` Keep in mind Discord embed limits, they apply. If you don't know the type of value you have to pass
+        into certain options, you're going to run into issues. That's why it's recommended to leave this for people who
+        know what they're doing. One very common one is colour, it has to be in decimal form, not hex. Some image
+        arguments only work if their text is defined, for example `footer_icon_url` only works if `footer_text` is
+        defined."""
         await ctx.message.delete()
         reserved_opts = [None, 'title', 'description', 'colour', 'url', 'footer_text', 'footer_icon_url', 'image',
                          'thumbnail', 'author_name', 'author_icon_url', 'author_url']
@@ -327,9 +330,9 @@ class Utility(commands.Cog):
         webhook = await get_webhook(ctx, self.client)
         await webhook.send(embed=em, username=ctx.author.display_name, avatar_url=ctx.author.display_avatar.url)
 
-    @commands.command(brief="Search urban dictionary", help="Search for a term on urban dictionary and get the results",
-                      usage="<term>", aliases=["ud"])
+    @commands.command(brief="Search urban dictionary", usage="<term>", aliases=["ud"])
     async def urbandictionary(self, ctx, *, term):
+        """Search for a term on urban dictionary and get the results"""
         try:
             r = requests.get("https://mashape-community-urban-dictionary.p.rapidapi.com/define", headers={
                 "x-rapidapi-host": "mashape-community-urban-dictionary.p.rapidapi.com",
@@ -365,17 +368,18 @@ class Utility(commands.Cog):
                       usage="<text>")
     @commands.cooldown(2, 60)
     async def hastebin(self, ctx, *, text):
+        """Easily upload text from Discord to a hastebin instance, you can also do this manually without a cooldown
+        online"""
         r = requests.post(self.bot_config["hastebin"] + "documents", data=text.strip().encode("utf-8"))
         if not r.ok:
             return await ctx.reply("Error occurred while attempting to upload to hastebin, try again later")
         await ctx.reply(self.bot_config["hastebin"] + r.json()["key"])
 
-    @commands.command(brief="Send a timestamp",
-                      help="Convert date time, date, or just time (with timezones) to a Discord timestamp. See the "
-                           "[discord api docs]"
-                           "(https://discord.com/developers/docs/reference#message-formatting-timestamp-styles) for "
-                           "format options.", usage="[format] <timestamp>", aliases=["ts"])
+    @commands.command(brief="Send a timestamp", usage="[format] <timestamp>", aliases=["ts"])
     async def timestamp(self, ctx, frmt: typing.Optional[TimestampFormatConverter] = "", *, timestamp):
+        """Convert date time, date, or just time (with timezones) to a Discord timestamp. See the
+        [discord api docs](https://discord.com/developers/docs/reference#message-formatting-timestamp-styles) for
+        format options."""
         parsed = dateparser.parse(timestamp)
         if parsed is None:
             return await ctx.send("Unable to parse given timestamp, try a more standard format")

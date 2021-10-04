@@ -1,6 +1,12 @@
 import nextcord
 
 def cut_mentions(objs, max_length) -> str:
+    """Cut a list of mentionable objects to a certain length
+
+    :param list objs: A list of objects from Discord that can be mentioned (e.g. Roles, Users, Members, Channels, etc)
+    :param int max_length: The maximum length to cut to
+    :return: A string cut to the specified length consisting of the mentions
+    """
     rf = ""
     for r in objs:
         if len(rf.strip() + r.mention) >= max_length - 3:
@@ -11,6 +17,12 @@ def cut_mentions(objs, max_length) -> str:
     return rf.strip()
 
 async def get_webhook(ctx, client) -> nextcord.Webhook:
+    """
+
+    :param ctx: The context you're looking for a webhook in
+    :param client: Bot client object
+    :return: A webhook associated with the channel provided in Context
+    """
     webhook = None
     for hook in await ctx.message.channel.webhooks():
         if hook.user.id == client.user.id:

@@ -14,6 +14,16 @@ logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(me
 class Reminder:
     def __init__(self, send_time: float, member: nextcord.Member, message: str, dm: bool, embed_colour: int,
                  original_message: nextcord.Message, channel: nextcord.TextChannel):
+        """Create a Reminder object
+
+        :param send_time: When the reminder should be sent
+        :param member: Member who requested the reminder
+        :param message: Message associated with the reminder provided by the requester
+        :param dm: Whether or not the reminder should be DMed to the requester
+        :param embed_colour: Colour of the reminder embed
+        :param original_message: Original message in which they requested the reminder
+        :param channel: Channel in which the reminder was requested
+        """
         self.t = send_time
         self.member = member
         self.channel = channel
@@ -23,6 +33,10 @@ class Reminder:
         self.embed_colour = embed_colour
 
     async def send_reminder(self, notify_time):
+        """Send the reminder to the pre-designated location
+
+        :param int notify_time: UNIX time in which the reminder was caught and the request to send was initiated
+        """
         em = nextcord.Embed(title="Here's your reminder!", description=self.message, colour=self.embed_colour)
         em.add_field(name="Reminder ID", value="[{}]({})".format(self.original_message.id,
                                                                  self.original_message.jump_url))
@@ -42,6 +56,7 @@ class Reminders(commands.Cog):
         self.reminders = {}
 
     async def check_reminders(self):
+        """Loop to check for any reminders every 5 seconds"""
         while self is self.client.get_cog("Reminders"):
             rm = []
             for reminder in self.reminders.values():
@@ -77,13 +92,13 @@ class Reminders(commands.Cog):
                 r.message, str(r.member)))
         asyncio.get_event_loop().create_task(self.check_reminders())
 
-    @commands.command(brief="Remind you of something later",
-                      help="Have the bot remind you of something after a certain amount of time. The variance for the "
-                           "reminder time is usually at most 5 seconds.", aliases=["remindme"],
+    @commands.command(brief="Remind you of something later", aliases=["remindme"],
                       usage="<reminder message> --days:=[days] --hours:=[hours] --minutes:=[minutes] "
                             "--seconds:=[seconds] --dm:=[yes/no]")
     @commands.guild_only()
     async def addreminder(self, ctx, *, args: TypedFlags):
+        """Have the bot remind you of something after a certain amount of time. The variance for the reminder time is
+        usually at most 5 seconds."""
         try:
             seconds = 0
             if "days" in args:
@@ -134,13 +149,12 @@ class Reminders(commands.Cog):
                                                               "channel": r.channel.id, "guild": ctx.guild.id}
         self.user_config.write_config()
 
-    @commands.command(brief="Remove a reminder", help="Remove a reminder, to specify which reminder, you have to "
-                                                      "provide a message URL or ID (the message in which you sent the "
-                                                      "initial reminder request). The ID should be available in the "
-                                                      "confirmation message, you can also get it yourself if you have "
-                                                      "developer mode on. The URL should be available by using "
-                                                      "Discord's 'Copy message link' button.", aliases=["forgetme"])
+    @commands.command(brief="Remove a reminder", aliases=["forgetme"])
     async def removereminder(self, ctx, original_message: nextcord.Message):
+        """Remove a reminder, to specify which reminder, you have to provide a message URL or ID (the message in which
+        you sent the initial reminder request). The ID should be available in the confirmation message, you can also get
+        it yourself if you have developer mode on. The URL should be available by using Discord's 'Copy message link'
+        button."""
         if original_message.id not in self.reminders:
             await ctx.send("That doesn't seem to be a valid reminder? Maybe it's already gone off, it's already been "
                            "deleted, or the message link is incorrect.")

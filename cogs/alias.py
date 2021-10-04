@@ -24,12 +24,12 @@ class Alias(commands.Cog):
         em.set_author(name="{}alias {}".format(ctx.clean_prefix, name))
         await ctx.send(embed=em)
 
-    @commands.command(brief="Add a message alias that can be called upon at any time", usage="\"<name>\" <message>",
-                      help="Add a message alias that can be called upon by using \"alias <name\" at any time. They are "
-                           "not case sensitive.")
+    @commands.command(brief="Add a message alias that can be called upon at any time", usage="\"<name>\" <message>")
     @commands.guild_only()
     @commands.has_guild_permissions(manage_messages=True)
     async def addalias(self, ctx, name, *, message):
+        """Add a message alias that can be called upon by using \"alias <name>\" at any time. They are not case
+        sensitive."""
         name = name.lower()
         if name in self.server_config[str(ctx.guild.id)]["aliases"]:
             return await ctx.send("`{}` is already an alias name for this server".format(name))
@@ -43,6 +43,7 @@ class Alias(commands.Cog):
     @commands.guild_only()
     @commands.has_guild_permissions(manage_messages=True)
     async def removealias(self, ctx, *, name):
+        """Remove an alias from the server"""
         name = name.lower()
         if name not in self.server_config[str(ctx.guild.id)]["aliases"]:
             return await ctx.send("`{}` is not an alias name for this server".format(name))
@@ -53,6 +54,7 @@ class Alias(commands.Cog):
     @commands.command(brief="Get a list of aliases")
     @commands.guild_only()
     async def aliases(self, ctx):
+        """Get a list of all aliases in the server"""
         aliases = list(self.server_config[str(ctx.guild.id)]["aliases"].keys())
         if len(aliases) < 1:
             return await ctx.send("This server has no aliases, create one with the `addalias` command")
