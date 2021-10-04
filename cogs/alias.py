@@ -10,7 +10,7 @@ class Alias(commands.Cog):
         self.server_config = server_config
         self.user_config = user_config
 
-    @commands.command(brief="Call upon an alias", aliases=["a"], usage="<alias>")
+    @commands.command(brief="Call upon an alias", aliases=["a", "tag"], usage="<alias>")
     @commands.guild_only()
     async def alias(self, ctx, *, name):
         name = name.lower()
