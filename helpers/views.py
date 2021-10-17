@@ -73,6 +73,32 @@ class AcceptDecline(nextcord.ui.View):
     async def decline(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         await self.default_response(interaction, False)
 
+
+# noinspection PyUnusedLocal
+class DeleteResponse(nextcord.ui.View):
+    def __init__(self, message, replied_author_id=None, timeout=60):
+        """Create a DeleteResponse view, it deletes the provided message when the author clicks the button
+
+        :param nextcord.Message message: Message to delete when the button is clicked
+        :param int replied_author_id: User ID of the author in which the response is for, if none any person can delete
+        the message
+        :param int timeout: Timeout for the button
+        """
+
+        super().__init__(timeout=timeout)
+        self.original_message = message
+        self.replied_author_id = replied_author_id
+
+    @nextcord.ui.button(label="Delete", emoji="🗑️", style=nextcord.ButtonStyle.red)
+    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+        if self.replied_author_id is not None or self.replied_author_id != interaction.user.id:
+            await self.original_message.delete()
+            await interaction.response.send_message("Message deleted.")
+        else:
+            await interaction.response.send_message("You're not the person this message is in reply to, as such you "
+                                                    "can't delete it.")
+
+
 # noinspection PyUnusedLocal
 class GenericPager(nextcord.ui.View):
     def __init__(self, ctx, original_message, page, entries, last_page=None, title=None, line_separator="\n\n", ipp=10,

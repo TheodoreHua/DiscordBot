@@ -12,7 +12,7 @@ from nextcord.ext import commands
 from typed_flags import TypedFlags
 
 from helpers.funcs import cut_mentions, get_webhook
-from helpers.views import IndividualPager
+from helpers.views import IndividualPager, DeleteResponse
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
 
@@ -34,6 +34,27 @@ class Utility(commands.Cog):
         self.bot_config = bot_config
         self.server_config = server_config
         self.user_config = user_config
+
+    @commands.Cog.listener()
+    async def on_message(self, msg):
+        if msg.guild is not None:
+            if len(msg.mentions) == 1:
+                if str(msg.mentions[0].id) in self.server_config[str(msg.guild.id)]["nopings"]:
+                    rep = await msg.reply(
+                        "Please do not ping " + msg.author.display_name, embed=nextcord.Embed(
+                            description=self.server_config[str(msg.guild.id)]["nopings"][str(msg.mentions[0].id)],
+                            colour=self.bot_config["embed_colour"]))
+                    v = DeleteResponse(rep, msg.author.id)
+                    await rep.edit(view=v)
+            elif 1 < len(msg.mentions) <= 25:
+                em = nextcord.Embed(title="Do not ping these users", colour=self.bot_config["embed_colour"])
+                for i in msg.mentions:
+                    if str(i.id) in self.server_config[str(msg.guild.id)]["nopings"]:
+                        em.add_field(name=i.display_name,
+                                     value=self.server_config[str(msg.guild.id)]["nopings"][str(i.id)], inline=False)
+                rep = msg.reply(embed=em)
+                v = DeleteResponse(rep, msg.author.id)
+                await rep.edit(view=v)
 
     @commands.command(aliases=["pfp"], brief="Get a user's profile picture")
     async def avatar(self, ctx, user: nextcord.User = None):
@@ -388,3 +409,23 @@ class Utility(commands.Cog):
             return await ctx.send("{0} (to use it in chat, enter `{0}` where you want it). The preview at the front of "
                                   "the message should be the timestamp in your local time, if it doesn't match up with "
                                   "what you expect, try again with a different format.".format(ts))
+
+    @commands.command(brief="Notify people not to ping you", aliases=["noping"], usage="<message>")
+    @commands.guild_only()
+    async def nopings(self, ctx, *, message):
+        """Automatically tell people not to ping you, with a custom message that'll be sent when they ping you.
+        This command is toggles the feature per-server."""
+        if str(ctx.author.id) in self.server_config[str(ctx.guild.id)]["nopings"]:
+            return await ctx.send("You already have pings disabled")
+        self.server_config[str(ctx.guild.id)]["nopings"][str(ctx.author.id)] = message
+        self.server_config.write_config()
+        await ctx.send("Successfully added to the no pings list")
+
+    @commands.command(brief="Disable the no ping feature", aliases=["disablenoping"])
+    @commands.guild_only()
+    async def disablenopings(self, ctx):
+        if str(ctx.author.id) not in self.server_config[str(ctx.guild.id)]["nopings"]:
+            return await ctx.send("You don't have pings disabled")
+        del self.server_config[str(ctx.guild.id)]["nopings"][str(ctx.author.id)]
+        self.server_config.write_config()
+        await ctx.send("Successfully removed from the no pings list")
