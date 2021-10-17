@@ -38,21 +38,28 @@ class Utility(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, msg):
         if msg.guild is not None:
+            if len(msg.mentions) > 0:
+                msg.mentions = [i for i in msg.mentions if i.id != msg.author.id]
             if len(msg.mentions) == 1:
                 if str(msg.mentions[0].id) in self.server_config[str(msg.guild.id)]["nopings"]:
-                    rep = await msg.reply(
-                        "Please do not ping " + msg.author.display_name, embed=nextcord.Embed(
-                            description=self.server_config[str(msg.guild.id)]["nopings"][str(msg.mentions[0].id)],
+                    rep = await msg.reply(embed=nextcord.Embed(
+                            title="Please do not ping " + msg.mentions[0].display_name,
+                            description="This user has requested that the following message be sent when people ping "
+                                        "them:\n" + "\n".join(["> {}".format(i) for i in self.server_config
+                            [str(msg.guild.id)]["nopings"][str(msg.mentions[0].id)].split("\n")]),
                             colour=self.bot_config["embed_colour"]))
                     v = DeleteResponse(rep, msg.author.id)
                     await rep.edit(view=v)
             elif 1 < len(msg.mentions) <= 25:
-                em = nextcord.Embed(title="Do not ping these users", colour=self.bot_config["embed_colour"])
+                em = nextcord.Embed(title="Do not ping these users",
+                                    description="These users have requested not to be pinged, below is a list of these "
+                                                "users, and a custom message supplied by them to go "
+                                                "along with it.", colour=self.bot_config["embed_colour"])
                 for i in msg.mentions:
                     if str(i.id) in self.server_config[str(msg.guild.id)]["nopings"]:
                         em.add_field(name=i.display_name,
                                      value=self.server_config[str(msg.guild.id)]["nopings"][str(i.id)], inline=False)
-                rep = msg.reply(embed=em)
+                rep = await msg.reply(embed=em)
                 v = DeleteResponse(rep, msg.author.id)
                 await rep.edit(view=v)
 
@@ -417,6 +424,8 @@ class Utility(commands.Cog):
         This command is toggles the feature per-server."""
         if str(ctx.author.id) in self.server_config[str(ctx.guild.id)]["nopings"]:
             return await ctx.send("You already have pings disabled")
+        elif len(message) > 1028:
+            return await ctx.send("The custom message is too long")
         self.server_config[str(ctx.guild.id)]["nopings"][str(ctx.author.id)] = message
         self.server_config.write_config()
         await ctx.send("Successfully added to the no pings list")

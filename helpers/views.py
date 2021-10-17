@@ -89,14 +89,18 @@ class DeleteResponse(nextcord.ui.View):
         self.original_message = message
         self.replied_author_id = replied_author_id
 
+    async def on_timeout(self):
+        self.stop()
+        await self.original_message.edit(view=None)
+
     @nextcord.ui.button(label="Delete", emoji="🗑️", style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         if self.replied_author_id is not None or self.replied_author_id != interaction.user.id:
             await self.original_message.delete()
-            await interaction.response.send_message("Message deleted.")
+            await interaction.response.send_message("Message deleted.", ephemeral=True)
         else:
             await interaction.response.send_message("You're not the person this message is in reply to, as such you "
-                                                    "can't delete it.")
+                                                    "can't delete it.", ephemeral=True)
 
 
 # noinspection PyUnusedLocal
