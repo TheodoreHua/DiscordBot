@@ -16,7 +16,6 @@ from helpers.views import IndividualPager, DeleteResponse
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
 
-
 class TimestampFormatConverter(commands.Converter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
