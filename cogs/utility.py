@@ -420,7 +420,7 @@ class Utility(commands.Cog):
     @commands.guild_only()
     async def nopings(self, ctx, *, message):
         """Automatically tell people not to ping you, with a custom message that'll be sent when they ping you.
-        This command is toggles the feature per-server."""
+        This command toggles the feature per-server."""
         if str(ctx.author.id) in self.server_config[str(ctx.guild.id)]["nopings"]:
             return await ctx.send("You already have pings disabled")
         elif len(message) > 1028:
