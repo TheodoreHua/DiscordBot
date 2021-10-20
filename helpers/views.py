@@ -95,7 +95,7 @@ class DeleteResponse(nextcord.ui.View):
 
     @nextcord.ui.button(label="Delete", emoji="🗑️", style=nextcord.ButtonStyle.red)
     async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
-        if self.replied_author_id is not None or self.replied_author_id != interaction.user.id:
+        if self.replied_author_id is None or self.replied_author_id == interaction.user.id:
             await self.original_message.delete()
             await interaction.response.send_message("Message deleted.", ephemeral=True)
         else:
