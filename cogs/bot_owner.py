@@ -61,6 +61,24 @@ class BotOwner(commands.Cog):
         paste_link = self.bot_config["hastebin"] + r.json()["key"] if r.ok else None
         await ctx.send("{}\n```\n{}\n```".format(paste_link, stdout.decode()[-1900:]))
 
+    @commands.command(hidden=True, usage="<type>")
+    @commands.is_owner()
+    @commands.dm_only()
+    async def showconfig(self, ctx, tp):
+        tp = tp.lower()
+        if tp == 'server':
+            d = self.server_config.__config__
+        elif tp == 'user':
+            d = self.user_config.__config__
+        else:
+            return await ctx.send("Invalid type")
+        if len(d) > 4000:
+            r = requests.post(self.bot_config["hastebin"] + "/documents", data=d)
+            return await ctx.send(self.bot_config["hastebin"] + "/documents", r.json()["key"])
+        else:
+            return await ctx.send(embed=nextcord.Embed(description="```json\n{}\n```".format(d),
+                                                       colour=self.bot_config["embed_colour"]))
+
     @commands.command(hidden=True)
     @commands.is_owner()
     async def restart(self, ctx):
