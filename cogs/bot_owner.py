@@ -82,10 +82,12 @@ class BotOwner(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def restart(self, ctx):
+    async def restart(self, ctx, save:bool=True):
         logging.info("Received restart command, terminating program and letting start script restart it")
         await ctx.send("Restarting...")
-        self.server_config.write_config()
+        if save:
+            self.server_config.write_config()
+            self.user_config.write_config()
         sys.exit()
 
     @commands.command(hidden=True)
@@ -94,6 +96,7 @@ class BotOwner(commands.Cog):
         logging.info("Received exit command, terminating program")
         await ctx.send("Exiting...")
         self.server_config.write_config()
+        self.user_config.write_config()
         with open("maintain.txt", "w") as f:
             f.write("n")
         sys.exit()
