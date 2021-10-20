@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import json
 import sys
 
 import requests
@@ -67,17 +68,17 @@ class BotOwner(commands.Cog):
     async def showconfig(self, ctx, tp):
         tp = tp.lower()
         if tp == 'server':
-            d = self.server_config.__config__
+            d = self.server_config
         elif tp == 'user':
-            d = self.user_config.__config__
+            d = self.user_config
         else:
             return await ctx.send("Invalid type")
-        if len(d) > 4000:
+        d = json.dumps(d.__config__, indent=2)
+        if len(d) > 1993:
             r = requests.post(self.bot_config["hastebin"] + "/documents", data=d)
             return await ctx.send(self.bot_config["hastebin"] + "/documents", r.json()["key"])
         else:
-            return await ctx.send(embed=nextcord.Embed(description="```json\n{}\n```".format(d),
-                                                       colour=self.bot_config["embed_colour"]))
+            return await ctx.send("```json\n{}\n```".format(d),)
 
     @commands.command(hidden=True)
     @commands.is_owner()
