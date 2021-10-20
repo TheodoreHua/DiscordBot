@@ -55,7 +55,7 @@ class ServerConfig:
 
         :param nextcord.Guild guild: Guild to add
         """
-        self.__config__[str(guild.id)] = self.defaults
+        self.__config__[str(guild.id)] = self.defaults.copy()
         logging.info("Added guild {} ({}) to guild config".format(guild.name, guild.id))
 
     def remove_guild(self, guild):
@@ -76,14 +76,14 @@ class ServerConfig:
             if str(guild.id) not in self.__config__.keys():
                 logging.info("guild {} ({}) was not in guild config, created with defaults"
                              .format(guild.name, guild.id))
-                self.__config__[str(guild.id)] = self.defaults
+                self.__config__[str(guild.id)] = self.defaults.copy()
                 w = True
             else:
                 for key in self.defaults.keys():
                     if key not in self.__config__[str(guild.id)].keys():
                         logging.info("guild {} ({}) was missing key {} in config, created with default"
                                      .format(guild.name, guild.id, key))
-                        self.__config__[str(guild.id)][key] = self.defaults[key]
+                        self.__config__[str(guild.id)][key] = self.defaults[key].copy()
                         w = True
         if w:
             logging.info("Overrode server config file after checking servers")
@@ -118,7 +118,7 @@ class UserConfig:
         for d in self.defaults:
             if d not in self.__config__:
                 w = True
-                self.__config__[d] = self.defaults[d]
+                self.__config__[d] = self.defaults[d].copy()
         if w:
             logging.info("Overrode user config file after checking for missing keys")
             self.write_config()
