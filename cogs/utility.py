@@ -11,7 +11,7 @@ import requests
 from nextcord.ext import commands
 from typed_flags import TypedFlags
 
-from helpers.funcs import cut_mentions, get_webhook
+from helpers.funcs import cut_mentions, add_fields, get_webhook
 from helpers.views import IndividualPager, DeleteResponse
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
@@ -120,8 +120,7 @@ class Utility(commands.Cog):
         if g.banner is not None:
             em.set_image(url=g.banner.url)
 
-        for name, value in fields.items():
-            em.add_field(name=name, value=value)
+        add_fields(em, fields)
         em.add_field(name="Roles", value=cut_mentions(reversed(g.roles), 1024), inline=False)
         em.add_field(name="Channels", value=cut_mentions(g.text_channels, 1024), inline=False)
 
@@ -158,9 +157,7 @@ class Utility(commands.Cog):
             "System User": member.system
         }
 
-        for name, value in fields.items():
-            em.add_field(name=name, value=value)
-
+        add_fields(em, fields)
         em.add_field(name="Roles", value=cut_mentions(member.roles, 1024), inline=False)
         guildperms = member.guild_permissions
         key_perms = {"Administrator": guildperms.administrator, "Ban Members": guildperms.ban_members,
@@ -173,6 +170,27 @@ class Utility(commands.Cog):
                      value=", ".join(x for x in key_permissions) if len(key_permissions) > 0 else "None", inline=False)
 
         await ctx.message.channel.send(embed=em)
+
+    @commands.command(brief="Show info about a role")
+    @commands.guild_only()
+    async def roleinfo(self, ctx, role: nextcord.Role):
+        """Show info about a role in the server"""
+        em = nextcord.Embed(description=role.mention, colour=self.bot_config["embed_colour"])
+        fields = {
+            "Role Name": role.name,
+            "Role ID": str(role.id),
+            "Hoisted": str(role.hoist),
+            "Managed": str(role.managed),
+            "Mentionable": str(role.mentionable),
+            "Colour": "RGB: {}\nHEX: {}".format(role.colour.to_rgb(), role.colour),
+            "Created At": role.created_at.strftime("%Y-%m-%d %H:%M UTC")
+        }
+
+        add_fields(em, fields)
+        em.add_field(name="Role Members ({:,})".format(len(role.members)),
+                     value=cut_mentions(role.members, 1024) if len(role.members) > 0 else "None", inline=False)
+
+        await ctx.send(embed=em)
 
     @commands.command(brief="Send animated emojis in your message without nitro", aliases=["ae"], usage="<message>")
     @commands.guild_only()
