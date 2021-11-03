@@ -54,13 +54,16 @@ class Utility(commands.Cog):
                                     description="These users have requested not to be pinged, below is a list of these "
                                                 "users, and a custom message supplied by them to go "
                                                 "along with it.", colour=self.bot_config["embed_colour"])
+                c = False
                 for i in msg.mentions:
                     if str(i.id) in self.server_config[str(msg.guild.id)]["nopings"]:
                         em.add_field(name=i.display_name,
                                      value=self.server_config[str(msg.guild.id)]["nopings"][str(i.id)], inline=False)
-                rep = await msg.reply(embed=em)
-                v = DeleteResponse(rep, msg.author.id)
-                await rep.edit(view=v)
+                        c = True
+                if c:
+                    rep = await msg.reply(embed=em)
+                    v = DeleteResponse(rep, msg.author.id)
+                    await rep.edit(view=v)
 
     @commands.command(aliases=["pfp"], brief="Get a user's profile picture")
     async def avatar(self, ctx, user: nextcord.User = None):
