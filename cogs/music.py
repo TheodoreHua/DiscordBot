@@ -51,7 +51,7 @@ class Player:
         self.next = asyncio.Event()
         self.current_song = None
         self.force_play = None
-        self.skips = 0
+        self.skips = []
         self.playing = True
         self.volume = 0.5
 
@@ -88,7 +88,7 @@ class Player:
 
             s.cleanup()
             self.current_song = None
-            self.skips = 0
+            self.skips = []
             if len([i for i in self.ctx.guild.get_member(self.client.user.id).voice.channel.members if not i.bot]) == 0:
                 await self.text_channel.send("Disconnected due to the VC being empty")
                 return self.destroy(self.guild)
@@ -325,14 +325,16 @@ class Music(commands.Cog):
             return await ctx.send("You must be in the bot's VC to use this command")
 
         player = self.get_player(ctx)
-        player.skips += 1
         vc_count = len([i for i in bm.voice.channel.members if not i.bot])
         h = ceil(vc_count / 2)
+        if ctx.author.id in player.skips:
+            return await ctx.send("You have already voted to skip! ({:,}/{:,} people)".format(len(player.skips), h))
+        player.skips.append(ctx.author.id)
         if vc_count <= 2:
             vc.stop()
             await ctx.message.reply("**Skipped!**")
-        elif player.skips >= h:
-            os = player.skips
+        elif len(player.skips) >= h:
+            os = len(player.skips)
             vc.stop()
             await ctx.message.reply("**Skipped!** ({:,}/{:,} people)".format(os, h))
         else:
