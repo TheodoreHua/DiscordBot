@@ -338,7 +338,7 @@ class Music(commands.Cog):
             vc.stop()
             await ctx.message.reply("**Skipped!** ({:,}/{:,} people)".format(os, h))
         else:
-            await ctx.message.reply("**Skipping?** ({:,}/{:,} people)".format(player.skips, h))
+            await ctx.message.reply("**Skipping?** ({:,}/{:,} people)".format(len(player.skips), h))
 
     @commands.command(brief="Force skip a song", aliases=['fs'])
     @commands.guild_only()
