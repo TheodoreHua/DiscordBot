@@ -36,7 +36,7 @@ class Utility(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg):
-        if msg.guild is not None:
+        if msg.guild is not None and not msg.author.bot:
             if len(msg.mentions) > 0:
                 msg.mentions = [i for i in msg.mentions if i.id != msg.author.id]
             if len(msg.mentions) == 1:
