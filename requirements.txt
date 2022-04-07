@@ -6,3 +6,4 @@ requests~=2.26.0
 minesweeperPy~=1.8
 youtube-dl~=2021.6.6
 dateparser~=1.0.0
+deck-of-cards~=0.0.10

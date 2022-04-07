@@ -4,6 +4,7 @@ import re
 
 import nextcord
 import requests
+from deck_of_cards import deck_of_cards
 from minesweeperPy import mineGen
 from nextcord.ext import commands
 
@@ -306,3 +307,239 @@ class Minigames(commands.Cog):
                 turn_number += 1
                 await msg.edit("", embed=embed_gen(grid, players, current_player, turn_number,
                                                    players[current_player][1]))
+
+    @commands.command(brief="Play a round of Blackjack", aliases=["bj"])
+    async def blackjack(self, ctx):
+        """Play a game of Blackjack with the bot as the dealer"""
+
+        def get_card(deck):
+            first_len = len(deck.deck)
+            card = deck.give_random_card()
+            second_len = len(deck.deck)
+            for x in range(0, first_len - second_len - 1):
+                deck.take_card(card)
+            return card
+
+        def get_emoji(value, suit):
+            suit_values = {0: "S", 1: "H", 2: "D", 3: "C"}
+            suit_letter = suit_values[suit]
+            for guild in self.client.guilds:
+                for emoji in guild.emojis:
+                    if emoji.name == str(value) + suit_letter:
+                        return "<:{}:{}>".format(emoji.name, str(emoji.id))
+            return "Error: Emoji Not Found"
+
+        def generate_deck(num_deck):
+            deck_obj = deck_of_cards.DeckOfCards()
+            for x in range(0, num_deck):
+                deck_obj.add_deck()
+            deck_obj.shuffle_deck()
+            return deck_obj
+
+        def get_value(hand):
+            val = 0
+            for card in hand:
+                if card.value > 10:
+                    val += 10
+                    continue
+                if card.value == 1:
+                    continue
+                val += card.value
+            for card in hand:
+                if card.value == 1:
+                    if val + 11 <= 21:
+                        val += 11
+                        continue
+                    else:
+                        val += 1
+            return val
+
+        def check_soft(hand):
+            val = 0
+            for card in hand:
+                if card.value > 10:
+                    val += 10
+                    continue
+                if card.value == 1:
+                    continue
+                val += card.value
+            status = []
+            for card in hand:
+                if card.value == 1:
+                    if val + 11 <= 21:
+                        status.append(True)
+                        val += 11
+                    else:
+                        status.append(False)
+                        val += 1
+            for status in status:
+                if status:
+                    return True
+            return False
+
+        def check(message):
+            if (message.author == ctx.message.author and message.content.lower() == "hit") or (
+                    message.author == ctx.message.author and message.content.lower() == "stand"):
+                return True
+            return False
+
+        def check_lose(hand):
+            val = get_value(hand)
+            if val > 21:
+                return True
+            return False
+
+        def embed_gen(player, dealer, status):
+            if status == "lost":
+                colour = nextcord.Colour.red()
+            elif status == "won":
+                colour = nextcord.Colour.green()
+            elif status == "tied":
+                colour = nextcord.Colour.gold()
+            else:
+                status = "An Error Has Occured"
+                colour = nextcord.Colour.dark_red()
+            embed = nextcord.Embed(
+                description="You {}!".format(status),
+                colour=colour
+            )
+            embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
+                             icon_url=ctx.message.author.avatar_url)
+            player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player)
+            dealer_emoji = " ".join(get_emoji(x.value, x.suit) for x in dealer)
+            player_value = str(get_value(player_hand))
+            dealer_value = str(get_value(dealer_hand))
+            if check_soft(player_hand):
+                player_value = "Soft " + str(get_value(player_hand))
+            if check_soft(dealer_hand):
+                dealer_value = "Soft " + str(get_value(dealer_hand))
+            if get_value(player_hand) == 21:
+                player_value = "Blackjack"
+            if get_value(dealer_hand) == 21:
+                dealer_value = "Blackjack"
+            embed.add_field(name="Your Hand:", value="{}\nValue: {}".format(player_emoji, player_value))
+            embed.add_field(name="Dealer's Hand:", value="{}\nValue: {}".format(dealer_emoji, dealer_value))
+            return embed
+
+        player_hand = []
+        dealer_hand = []
+        deck = generate_deck(6)
+        dealer_hand.append(get_card(deck))
+        dealer_hand.append(get_card(deck))
+        player_hand.append(get_card(deck))
+        player_hand.append(get_card(deck))
+        embed = nextcord.Embed(
+            description="Type `hit` to draw another card or `stand` to pass. If you don't respond for 1 minute, you lose!",
+            colour=nextcord.Colour.blue()
+        )
+        embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
+                         icon_url=ctx.message.author.avatar_url)
+        player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player_hand)
+        dealer_emoji = get_emoji(dealer_hand[0].value, dealer_hand[0].suit) + " " + "<:blue_back:706507690054123561>"
+        player_value = str(get_value(player_hand))
+        dealer_value = str(dealer_hand[0].value)
+        if dealer_hand[0].value > 10:
+            dealer_value = "10"
+        if check_soft(player_hand):
+            player_value = "Soft " + str(get_value(player_hand))
+        if check_soft(dealer_hand) and dealer_hand[0].value == 1:
+            dealer_value = "Soft 11"
+        embed.add_field(name="Your Hand:", value="{}\nValue: {}".format(player_emoji, player_value))
+        embed.add_field(name="Dealer's Hand:", value="{}\nValue: {}".format(dealer_emoji, dealer_value))
+        message = await ctx.message.channel.send(embed=embed)
+        if check_lose(dealer_hand):
+            await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
+            return
+        if get_value(player_hand) == 21:
+            await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
+            return
+        if get_value(dealer_hand) == 21:
+            await message.edit(embed=embed_gen(player_hand, dealer_hand, "lost"))
+            return
+        if check_lose(player_hand):
+            await message.edit(embed=embed_gen(player_hand, dealer_hand, "lost"))
+            return
+        while True:
+            try:
+                choice = await self.client.wait_for("message", check=check, timeout=60)
+            except asyncio.TimeoutError:
+                await ctx.message.channel.send("You took more than 1 minute to answer, you lost!")
+                return
+            if choice.content.lower() == "stand":
+                break
+            player_hand.append(get_card(deck))
+            if check_lose(player_hand):
+                await message.edit(embed=embed_gen(player_hand, dealer_hand, "lost"))
+                return
+            if get_value(player_hand) == 21:
+                await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
+                return
+            if len(player_hand) >= 7:
+                await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
+                return
+            embed = nextcord.Embed(
+                description="Type `hit` to draw another card or `stand` to pass. If you don't respond for 1 minute, you lose!",
+                colour=nextcord.Colour.blue()
+            )
+            embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
+                             icon_url=ctx.message.author.avatar_url)
+            player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player_hand)
+            dealer_emoji = get_emoji(dealer_hand[0].value,
+                                     dealer_hand[0].suit) + " " + "<:blue_back:706507690054123561>"
+            player_value = str(get_value(player_hand))
+            dealer_value = str(dealer_hand[0].value)
+            if dealer_hand[0].value > 10:
+                dealer_value = "10"
+            if check_soft(player_hand):
+                player_value = "Soft " + str(get_value(player_hand))
+            if check_soft(dealer_hand) and dealer_hand[0].value == 1:
+                dealer_value = "Soft 11"
+            if get_value(player_hand) == 21:
+                await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
+                return
+            embed.add_field(name="Your Hand:", value="{}\nValue: {}".format(player_emoji, player_value))
+            embed.add_field(name="Dealer's Hand:", value="{}\nValue: {}".format(dealer_emoji, dealer_value))
+            await message.edit(embed=embed)
+        while get_value(dealer_hand) < 17:
+            dealer_hand.append(get_card(deck))
+            if check_lose(dealer_hand):
+                await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
+                return
+            if get_value(dealer_hand) == 21:
+                await message.edit(embed=embed_gen(player_hand, dealer_hand, "lost"))
+                return
+            if len(dealer_hand) >= 7:
+                await message.edit(embed=embed_gen(player_hand, dealer_hand, "lost"))
+                return
+            embed = nextcord.Embed(
+                description="Dealer is playing!",
+                colour=nextcord.Colour.orange()
+            )
+            embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
+                             icon_url=ctx.message.author.avatar_url)
+            player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player_hand)
+            dealer_emoji = " ".join(get_emoji(x.value, x.suit) for x in dealer_hand)
+            player_value = str(get_value(player_hand))
+            dealer_value = str(get_value(dealer_hand))
+            if check_soft(player_hand):
+                player_value = "Soft " + str(get_value(player_hand))
+            if check_soft(dealer_hand):
+                dealer_value = "Soft " + str(get_value(dealer_hand))
+            if get_value(player_hand) == 21:
+                player_value = "Blackjack"
+            if get_value(dealer_hand) == 21:
+                dealer_value = "Blackjack"
+            embed.add_field(name="Your Hand:", value="{}\nValue: {}".format(player_emoji, player_value))
+            embed.add_field(name="Dealer's Hand:", value="{}\nValue: {}".format(dealer_emoji, dealer_value))
+            await message.edit(embed=embed)
+            await asyncio.sleep(1)
+        if get_value(dealer_hand) == get_value(player_hand):
+            await message.edit(embed=embed_gen(player_hand, dealer_hand, "tied"))
+            return
+        winning_value = min([get_value(player_hand), get_value(dealer_hand)],
+                            key=lambda list_value: abs(list_value - 21))
+        if winning_value == get_value(player_hand):
+            await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
+            return
+        await message.edit(embed=embed_gen(player_hand, dealer_hand, "lost"))
+        return
