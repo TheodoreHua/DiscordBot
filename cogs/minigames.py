@@ -404,7 +404,7 @@ class Minigames(commands.Cog):
                 colour=colour
             )
             embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
-                             icon_url=ctx.message.author.avatar_url)
+                             icon_url=ctx.message.author.display_avatar.url)
             player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player)
             dealer_emoji = " ".join(get_emoji(x.value, x.suit) for x in dealer)
             player_value = str(get_value(player_hand))
@@ -433,7 +433,7 @@ class Minigames(commands.Cog):
             colour=nextcord.Colour.blue()
         )
         embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
-                         icon_url=ctx.message.author.avatar_url)
+                         icon_url=ctx.message.author.display_avatar.url)
         player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player_hand)
         dealer_emoji = get_emoji(dealer_hand[0].value, dealer_hand[0].suit) + " " + "<:blue_back:706507690054123561>"
         player_value = str(get_value(player_hand))
@@ -482,7 +482,7 @@ class Minigames(commands.Cog):
                 colour=nextcord.Colour.blue()
             )
             embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
-                             icon_url=ctx.message.author.avatar_url)
+                             icon_url=ctx.message.author.display_avatar.url)
             player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player_hand)
             dealer_emoji = get_emoji(dealer_hand[0].value,
                                      dealer_hand[0].suit) + " " + "<:blue_back:706507690054123561>"
@@ -516,7 +516,7 @@ class Minigames(commands.Cog):
                 colour=nextcord.Colour.orange()
             )
             embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
-                             icon_url=ctx.message.author.avatar_url)
+                             icon_url=ctx.message.author.display_avatar.url)
             player_emoji = " ".join(get_emoji(x.value, x.suit) for x in player_hand)
             dealer_emoji = " ".join(get_emoji(x.value, x.suit) for x in dealer_hand)
             player_value = str(get_value(player_hand))
