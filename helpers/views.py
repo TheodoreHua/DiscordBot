@@ -130,6 +130,10 @@ class GenericPager(nextcord.ui.View):
         self.ipp = ipp
         self.expected_uid = ctx.author.id
 
+    async def on_timeout(self):
+        self.stop()
+        await self.original_message.edit(view=None)
+
     def generate_embed(self):
         """Generate the embed for a certain page
 
