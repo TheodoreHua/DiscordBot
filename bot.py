@@ -98,6 +98,11 @@ async def on_command_error(ctx, error):
             description=":x: An internal exception occurred while running this command.", colour=nextcord.Colour.red()))
 
 
+@client.slash_command(guild_ids=[1051172633334526013])
+async def ping_slash(interaction: nextcord.Interaction):
+    await interaction.response.send_message("Pong! `{:,.4f}ms`".format(client.latency * 1000))
+
+
 if __name__ == "__main__":
     if "BOT_TOKEN" not in environ:
         load_dotenv()
