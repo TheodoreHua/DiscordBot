@@ -75,8 +75,8 @@ class BotOwner(commands.Cog):
             return await ctx.send("Invalid type")
         d = json.dumps(d.__config__, indent=2)
         if len(d) > 1993:
-            r = requests.post(self.bot_config["hastebin"] + "/documents", data=d)
-            return await ctx.send(self.bot_config["hastebin"] + "/documents", r.json()["key"])
+            r = requests.post(self.bot_config["hastebin"] + "documents", data=d)
+            return await ctx.send(self.bot_config["hastebin"] + r.json()["key"])
         else:
             return await ctx.send("```json\n{}\n```".format(d),)
 
