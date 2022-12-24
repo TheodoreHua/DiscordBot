@@ -341,10 +341,9 @@ class Utility(commands.Cog):
         example the flag `--Test Field:=Something` would result in a field named `Test Field` with a value of
         `Something` Keep in mind Discord embed limits, they apply. If you don't know the type of value you have to pass
         into certain options, you're going to run into issues. That's why it's recommended to leave this for people who
-        know what they're doing. If you would like the fields to be inline, add `<!>` to the front and back of the field
-        name. One very common one is colour, it has to be in decimal form, not hex. Some image arguments only work if
-        their text is defined, for example `footer_icon_url` only works if `footer_text` is
-        defined."""
+        know what they're doing. If you would like the fields to not be inline, add `<!>` to the front and back of the
+        field name. One very common one is colour, it has to be in decimal form, not hex. Some image arguments only work
+        if their text is defined, for example `footer_icon_url` only works if `footer_text` is defined."""
         await ctx.message.delete()
         reserved_opts = [None, 'title', 'description', 'colour', 'url', 'footer_text', 'footer_icon_url', 'image',
                          'thumbnail', 'author_name', 'author_icon_url', 'author_url']
@@ -371,10 +370,10 @@ class Utility(commands.Cog):
             for n, v in args.items():
                 if c >= 25:
                     return await ctx.send("Too many fields")
-                inline = False
+                inline = True
                 if n.startswith("<!>") and n.endswith("<!>"):
                     n = n[3:-3]
-                    inline = True
+                    inline = False
                 em.add_field(name=n, value=v, inline=inline)
                 c += 1
         except ValueError:
