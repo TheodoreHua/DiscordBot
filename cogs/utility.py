@@ -341,7 +341,7 @@ class Utility(commands.Cog):
         example the flag `--Test Field:=Something` would result in a field named `Test Field` with a value of
         `Something` Keep in mind Discord embed limits, they apply. If you don't know the type of value you have to pass
         into certain options, you're going to run into issues. That's why it's recommended to leave this for people who
-        know what they're doing. If you would like the fields to be inline, add <!> to the front and back of the field
+        know what they're doing. If you would like the fields to be inline, add `<!>` to the front and back of the field
         name. One very common one is colour, it has to be in decimal form, not hex. Some image arguments only work if
         their text is defined, for example `footer_icon_url` only works if `footer_text` is
         defined."""
