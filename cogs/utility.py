@@ -329,13 +329,13 @@ class Utility(commands.Cog):
 
         await ctx.send(embed=em)
 
-    @commands.command(brief="Send a custom embed", aliases=["embedgen", "eg"],
+    @commands.command(brief="Send a custom embed", aliases=["embedgen", "embed"],
                       usage="--title:=[title] --description:=[description] --colour:=[colour in decimal format] "
                             "--url:=[title url] --footer_text:=[footer text] --footer_icon_url:=[footer icon url] "
                             "--image:=[image] --thumbnail:=[thumbnail] --author_name:=[author name] "
                             "--author_icon_url:=[author icon url] --author_url:=[author url]")
     @commands.guild_only()
-    async def embed(self, ctx, *, args: TypedFlags):
+    async def eg(self, ctx, *, args: TypedFlags):
         """Send your own custom embed, all embed options are available under flags (as seen in the usage help). You can
         define your own custom fields by using flags as well, you just can't name them anything that already exists. For
         example the flag `--Test Field:=Something` would result in a field named `Test Field` with a value of
