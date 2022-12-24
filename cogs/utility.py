@@ -350,7 +350,8 @@ class Utility(commands.Cog):
         try:
             e = nextcord.Embed.Empty
             em = nextcord.Embed(title=args.get('title', e), description=args.get('description', e),
-                                colour=int(args.get('colour')) if 'colour' in args else e, url=args.get('url', e))
+                                colour=int(args.get('colour')) if 'colour' in args else nextcord.Colour.random(),
+                                url=args.get('url', e))
             if "footer_text" in args:
                 em.set_footer(text=args.get('footer_text', e), icon_url=args.get('footer_icon_url', e))
             if "image" in args:

@@ -86,7 +86,7 @@ class BotHelp(HelpCommand):
         await self.send()
 
     async def send_command_help(self, command):
-        usg = "{}{} {}".format(self.context.clean_prefix, command.name, command.usage or "")
+        usg = "{}{} {}".format(self.context.clean_prefix, command.qualified_name, command.usage or "")
         em = nextcord.Embed(title=usg if len(usg) <= 256 else nextcord.Embed.Empty,
                             description=("`{}`\n\n".format(usg) if len(usg) > 256 else "") + sub(r"(?<!\n)\n(?!\n)", " ", command.help or command.brief or ""),
                             colour=nextcord.Colour.random())
