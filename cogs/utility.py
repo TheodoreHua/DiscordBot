@@ -348,9 +348,9 @@ class Utility(commands.Cog):
         reserved_opts = [None, 'title', 'description', 'colour', 'url', 'footer_text', 'footer_icon_url', 'image',
                          'thumbnail', 'author_name', 'author_icon_url', 'author_url']
         try:
-            e = nextcord.Embed.Empty
+            e = None
             em = nextcord.Embed(title=args.get('title', e), description=args.get('description', e),
-                                colour=int(args.get('colour')) if 'colour' in args else nextcord.Colour.random(),
+                                colour=int(args.get('colour')) if 'colour' in args else e,
                                 url=args.get('url', e))
             if "footer_text" in args:
                 em.set_footer(text=args.get('footer_text', e), icon_url=args.get('footer_icon_url', e))
