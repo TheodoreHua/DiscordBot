@@ -201,7 +201,7 @@ class Music(commands.Cog):
             await ctx.send("**Searching `{}`**".format(url))
             p = await self.get_data(url)
         except (YTDLError, yt_dlp.utils.DownloadError) as e:
-            await ctx.message.reply(":x: " + str(e))
+            await ctx.message.reply(":x: {}".format(e))
             return
         player = self.get_player(ctx)
         if 'url' in p and 'ytsearch' in p["url"]:
