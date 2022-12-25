@@ -206,9 +206,10 @@ class Music(commands.Cog):
                                            "all songs page.")
         elif 'entries' in p:
             c = 0
+            failed = []
             for i in p['entries']:
                 if i.get('duration') is None:
-                    await ctx.send(":x: Error loading `{}`".format(i.get('title', 'Unknown Video Name')))
+                    failed.append(i.get('title'))
                     continue
                 await player.queue.put(i)
                 c += 1
@@ -217,6 +218,21 @@ class Music(commands.Cog):
             em.set_author(icon_url=ctx.author.avatar.url, name="Playlist added to queue")
             em.add_field(name="Playlist Author", value=p['uploader'])
             em.add_field(name="Enqueued", value="`{:,}` songs".format(c))
+            if len(failed) > 0:
+                private = 0
+                deleted = 0
+                other = []
+                for i in failed:
+                    if i == "[Private video]":
+                        private += 1
+                    elif i == "[Deleted video]":
+                        deleted += 1
+                    else:
+                        other.append(i)
+                if private > 0: em.add_field(name="Ignored (Private)", value="`{:,}`".format(private))
+                if deleted > 0: em.add_field(name="Ignored (Deleted)", value="`{:,}`".format(deleted))
+                if len(other) > 0:
+                    em.add_field(name="Failed to Add:", value="`{}`".format("`, `".join(other)), inline=False)
             await ctx.message.reply(embed=em)
         else:
             await player.queue.put(p)
