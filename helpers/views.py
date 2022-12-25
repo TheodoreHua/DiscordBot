@@ -177,6 +177,7 @@ class GenericPager(discord.ui.View):
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.stop()
         await self.original_message.edit(view=None)
+        await interaction.response.defer()
 
     @discord.ui.button(label=">", style=discord.ButtonStyle.blurple)
     async def after(self, interaction: discord.Interaction, button: discord.ui.Button):
