@@ -31,6 +31,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.duration = data.get('duration')
         self.url = data.get('webpage_url')
         self.stream_url = data.get('url')
+        if self.title is None or self.url is None or self.duration is None:
+            raise YTDLError('Invalid data from YouTube.')
 
     @classmethod
     def create_source_from_data(cls, channel, data, volume=0.5):
@@ -207,7 +209,10 @@ class Music(commands.Cog):
         elif 'entries' in p:
             c = 0
             for i in p['entries']:
-                await player.queue.put(i)
+                try:
+                    await player.queue.put(i)
+                except YTDLError:
+                    await ctx.message.send("**Error** adding `{}` to the queue".format(i.get("title", "Unknown")))
                 c += 1
             em = discord.Embed(description="[{}]({})".format(p['title'], p['webpage_url']),
                                 colour=self.bot_config["embed_colour"])
