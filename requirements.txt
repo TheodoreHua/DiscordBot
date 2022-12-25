@@ -4,6 +4,6 @@ discord-typed-flags~=1.1.4
 pyparsing~=2.4.7
 requests~=2.26.0
 minesweeperPy~=1.8
-youtube-dl~=2021.12.17
+yt-dlp~=2022.11.11
 dateparser~=1.0.0
 deck-of-cards~=0.0.10

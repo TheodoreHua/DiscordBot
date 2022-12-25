@@ -4,13 +4,13 @@ from datetime import timedelta
 from math import ceil
 
 import nextcord
-import youtube_dl
+import yt_dlp
 from async_timeout import timeout
 from nextcord.ext import commands
 
 from helpers.views import MusicQueuePager
 
-ytdl = youtube_dl.YoutubeDL({'format': 'bestaudio/best', 'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+ytdl = yt_dlp.YoutubeDL({'format': 'bestaudio/best', 'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
                              'restrictfilenames': True, 'noplaylist': True, 'nocheckcertificate': True,
                              'ignoreerrors': False, 'quiet': True, 'no_warnings': True, 'default_search': 'auto',
                              'source_address': '0.0.0.0'})
