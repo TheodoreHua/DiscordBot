@@ -213,10 +213,9 @@ class Music(commands.Cog):
                     continue
                 await player.queue.put(i)
                 c += 1
-            em = discord.Embed(description="[{}]({})".format(p['title'], p['webpage_url']),
+            em = discord.Embed(description="[{}]({}) by {}".format(p['title'], p['webpage_url'], p['uploader']),
                                 colour=self.bot_config["embed_colour"])
             em.set_author(icon_url=ctx.author.avatar.url, name="Playlist added to queue")
-            em.add_field(name="Playlist Author", value=p['uploader'])
             em.add_field(name="Enqueued", value="`{:,}` songs".format(c))
             if len(failed) > 0:
                 private = 0
