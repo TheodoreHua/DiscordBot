@@ -4,7 +4,7 @@ import textwrap
 from time import time
 from signal import Signals
 
-from nextcord.ext import commands
+from discord.ext import commands
 
 ESCAPE_REGEX = re.compile("[`\u202E\u200B]{3,}")
 FORMATTED_CODE_REGEX = re.compile(

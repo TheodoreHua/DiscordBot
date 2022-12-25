@@ -2,11 +2,11 @@ import asyncio
 import random
 import re
 
-import nextcord
+import discord
 import requests
 from deck_of_cards import deck_of_cards
 from minesweeperPy import mineGen
-from nextcord.ext import commands
+from discord.ext import commands
 
 from helpers.views import RpsChoice, AcceptDecline
 
@@ -29,24 +29,24 @@ class Minigames(commands.Cog):
         view = RpsChoice(ctx.author.id)
         msg = await ctx.send("Choose your hand", view=view)
         if await view.wait():
-            await msg.edit("", embed=nextcord.Embed(title="You lost", description="You didn't pick an option in time",
-                                                    colour=nextcord.Colour.red()), view=None)
+            await msg.edit(content="", embed=discord.Embed(title="You lost", description="You didn't pick an option in time",
+                                                    colour=discord.Colour.red()), view=None)
 
         bot_choice = random.choice(["Rock", "Paper", "Scissors"])
         if bot_choice == view.choice:
-            await msg.edit("", embed=nextcord.Embed(
-                title="We tied", description="We both picked " + view.choice, colour=nextcord.Colour.yellow()),
+            await msg.edit(content="", embed=discord.Embed(
+                title="We tied", description="We both picked " + view.choice, colour=discord.Colour.yellow()),
                            view=None)
         else:
             wm = {"Rock": "Scissors", "Scissors": "Paper", "Paper": "Rock"}
             if wm[bot_choice] == view.choice:
-                await msg.edit("", embed=nextcord.Embed(
+                await msg.edit(content="", embed=discord.Embed(
                     title="I won", description="I picked {}, you picked {}".format(bot_choice, view.choice),
-                    colour=nextcord.Colour.red()), view=None)
+                    colour=discord.Colour.red()), view=None)
             else:
-                await msg.edit("", embed=nextcord.Embed(
+                await msg.edit(content="", embed=discord.Embed(
                     title="You won", description="I picked {}, you picked {}".format(bot_choice, view.choice),
-                    colour=nextcord.Colour.green()), view=None)
+                    colour=discord.Colour.green()), view=None)
 
     @commands.command(brief="Play a game of hangman")
     async def hangman(self, ctx, lives: int = 6):
@@ -57,7 +57,7 @@ class Minigames(commands.Cog):
         guessed_letters = []
         win, desc, col = False, None, None
 
-        em = nextcord.Embed(title="".join(["%" for _ in word]),
+        em = discord.Embed(title="".join(["%" for _ in word]),
                             description="Welcome to Hangman! You have {:,} lives, guess by typing a letter or your full "
                                         "word guess in chat. Valid guesses are alphabet characters and dashes/hyphens. "
                                         "Type `=quit=` to leave the game".format(lives),
@@ -71,42 +71,42 @@ class Minigames(commands.Cog):
                 res = await self.client.wait_for('message',
                                                  check=lambda i: wf_check(i, ctx, r"^(=quit=|[a-zA-Z-]+)$"), timeout=30)
             except asyncio.TimeoutError:
-                await msg.edit(embed=nextcord.Embed(title=word, description="You took too long to answer.",
-                                                    colour=nextcord.Colour.dark_red()))
+                await msg.edit(embed=discord.Embed(title=word, description="You took too long to answer.",
+                                                    colour=discord.Colour.dark_red()))
                 return
 
             await res.delete()
             guess = res.content.lower()
             if guess == "=quit=":
-                await msg.edit(embed=nextcord.Embed(title=word, description="You quit the game.",
-                                                    colour=nextcord.Colour.dark_red()))
+                await msg.edit(embed=discord.Embed(title=word, description="You quit the game.",
+                                                    colour=discord.Colour.dark_red()))
                 return
             elif guess in guessed_letters:
                 desc = "You already guessed this letter!"
-                col = nextcord.Colour.yellow()
+                col = discord.Colour.yellow()
             elif len(guess) == 1:
                 guessed_letters.append(guess)
                 if all([i in guessed_letters for i in word]):
                     win = True
                 elif guess in word:
                     desc = "`{}` is in the word!".format(guess)
-                    col = nextcord.Colour.green()
+                    col = discord.Colour.green()
                 else:
                     desc = "`{}` is not in the word!".format(guess)
-                    col = nextcord.Colour.red()
+                    col = discord.Colour.red()
                     lives -= 1
             else:
                 if guess == word:
                     win = True
                 else:
                     desc = "That's not it, try again"
-                    col = nextcord.Colour.red()
+                    col = discord.Colour.red()
                     lives -= 1
 
             if win:
                 break
 
-            new_em = nextcord.Embed(title="".join(map(lambda i: "%" if i not in guessed_letters else i, word)),
+            new_em = discord.Embed(title="".join(map(lambda i: "%" if i not in guessed_letters else i, word)),
                                     description=desc, colour=col)
             new_em.add_field(name="Lives", value="{:,}".format(lives))
             new_em.add_field(name="Guessed", value="`" + " ".join(
@@ -114,12 +114,12 @@ class Minigames(commands.Cog):
             await msg.edit(embed=new_em)
 
         if win:
-            await msg.edit(embed=nextcord.Embed(title=word, description="You won with {:,} lives left".format(lives),
-                                                colour=nextcord.Colour.dark_green()))
+            await msg.edit(embed=discord.Embed(title=word, description="You won with {:,} lives left".format(lives),
+                                                colour=discord.Colour.dark_green()))
         else:
-            await msg.edit(embed=nextcord.Embed(title=word,
+            await msg.edit(embed=discord.Embed(title=word,
                                                 description="You ran out of lives, the word was `{}`".format(word),
-                                                colour=nextcord.Colour.dark_red()))
+                                                colour=discord.Colour.dark_red()))
 
     @commands.command(brief="Play a number guess game", aliases=["numberguess", "ng"])
     async def numguess(self, ctx, lives: int = 8, upper_bound: int = 100):
@@ -128,7 +128,7 @@ class Minigames(commands.Cog):
         num = random.randint(0, upper_bound)
         win, desc, col = False, None, None
 
-        em = nextcord.Embed(title="Welcome",
+        em = discord.Embed(title="Welcome",
                             description="Welcome to the number guessing game. Guess a number by sending a message then "
                                         "follow the clues to guess the correct number. Type `=quit=` to quit.",
                             colour=self.bot_config["embed_colour"])
@@ -141,48 +141,48 @@ class Minigames(commands.Cog):
                 res = await self.client.wait_for('message',
                                                  check=lambda i: wf_check(i, ctx, r"^(=quit=|-?\d+)$"), timeout=30)
             except asyncio.TimeoutError:
-                await msg.edit(embed=nextcord.Embed(title="Answer: {:,}".format(num),
+                await msg.edit(embed=discord.Embed(title="Answer: {:,}".format(num),
                                                     description="You took too long to answer.",
-                                                    colour=nextcord.Colour.dark_red()))
+                                                    colour=discord.Colour.dark_red()))
                 return
 
             await res.delete()
             if res.content == "=quit=":
-                await msg.edit(embed=nextcord.Embed(title="Answer: {:,}".format(num),
+                await msg.edit(embed=discord.Embed(title="Answer: {:,}".format(num),
                                                     description="You quit the game.",
-                                                    colour=nextcord.Colour.dark_red()))
+                                                    colour=discord.Colour.dark_red()))
                 return
 
             guess = int(res.content)
             if not 0 <= guess <= upper_bound:
                 desc = "Your number must be in the range 0-{:,}!".format(upper_bound)
-                col = nextcord.Colour.yellow()
+                col = discord.Colour.yellow()
             elif guess == num:
                 win = True
                 break
             elif guess > num:
                 desc = "Your guess was **too high**."
-                col = nextcord.Colour.red()
+                col = discord.Colour.red()
                 lives -= 1
             elif guess < num:
                 desc = "Your guess was **too low**."
-                col = nextcord.Colour.red()
+                col = discord.Colour.red()
                 lives -= 1
 
-            new_em = nextcord.Embed(title="Guess: {:,}".format(guess),
+            new_em = discord.Embed(title="Guess: {:,}".format(guess),
                                     description=desc, colour=col)
             new_em.add_field(name="Lives", value="{:,}".format(lives))
             em.add_field(name="Range", value="0-{:,}".format(upper_bound))
             await msg.edit(embed=new_em)
 
         if win:
-            await msg.edit(embed=nextcord.Embed(title="Answer: {:,}".format(num),
+            await msg.edit(embed=discord.Embed(title="Answer: {:,}".format(num),
                                                 description="You won with {:,} lives left".format(lives),
-                                                colour=nextcord.Colour.dark_green()))
+                                                colour=discord.Colour.dark_green()))
         else:
-            await msg.edit(embed=nextcord.Embed(title="Answer: {:,}".format(num),
+            await msg.edit(embed=discord.Embed(title="Answer: {:,}".format(num),
                                                 description="You ran out of lives",
-                                                colour=nextcord.Colour.dark_red()))
+                                                colour=discord.Colour.dark_red()))
 
     @commands.command(brief="Send a minesweeper grid")
     async def minesweeper(self, ctx, difficulty="medium", grid_width: int = 5, grid_height: int = 5):
@@ -215,7 +215,7 @@ class Minigames(commands.Cog):
         await ctx.send("\n".join(i for i in grid_send))
 
     @commands.command(brief="Play a game of Tic Tac Toe", aliases=["ttt"])
-    async def tictactoe(self, ctx, player: nextcord.Member):
+    async def tictactoe(self, ctx, player: discord.Member):
         """Play a game of Tic Tac Toe with another server member"""
         if player == ctx.author or player.bot:
             await ctx.send("You can't invite this player to a game!", delete_after=5)
@@ -224,7 +224,7 @@ class Minigames(commands.Cog):
         msg = await ctx.send("{}, {} wants to play a game of Tic Tac Toe with you, would you like to play?".format(
             player.mention, ctx.author.mention), view=confirm)
         if await confirm.wait() or not confirm.status:
-            await msg.edit("Sorry, looks like they didn't want to play.", view=None)
+            await msg.edit(content="Sorry, looks like they didn't want to play.", view=None)
             return
         await msg.delete()
 
@@ -239,7 +239,7 @@ class Minigames(commands.Cog):
             return desc.rstrip()
 
         def embed_gen(grid, players, current_player, turn, colour):
-            em = nextcord.Embed(title="{} ({}) vs. {} ({})".format(players[1][0].display_name, players[1][2].upper(),
+            em = discord.Embed(title="{} ({}) vs. {} ({})".format(players[1][0].display_name, players[1][2].upper(),
                                                                    players[-1][0].display_name, players[-1][2].upper()),
                                 description=descrip_gen(grid), colour=colour)
             em.add_field(name="Current Player", value="{} ({})".format(players[current_player][0].mention,
@@ -266,21 +266,21 @@ class Minigames(commands.Cog):
         emap = {"1": "1️⃣", "2": "2️⃣", "3": "3️⃣", "4": "4️⃣", "5": "5️⃣", "6": "6️⃣", "7": "7️⃣", "8": "8️⃣", "9": "9️⃣",
                 "0": "0️⃣", "x": "🇽", "o": "🇴"}
         grid, reacts, turn_number = [emap[str(i)] for i in range(1, 10)], {}, 1
-        players, current_player = {1: (ctx.author, nextcord.Colour.blue(), "x"),
-                                   -1: (player, nextcord.Colour.yellow(), "o")}, random.choice([1, -1])
+        players, current_player = {1: (ctx.author, discord.Colour.blue(), "x"),
+                                   -1: (player, discord.Colour.yellow(), "o")}, random.choice([1, -1])
         msg = await ctx.send("{}, the game has started. Please wait while I setup the game..."
                              .format(ctx.author.mention),
                              embed=embed_gen(grid, players, current_player, turn_number, players[current_player][1]))
         for emoji in grid:
             reacts[emoji] = await msg.add_reaction(emoji)
-        await msg.edit("Game has been successfully setup, you may take your turn")
+        await msg.edit(content="Game has been successfully setup, you may take your turn")
 
         while True:
             try:
                 react = await self.client.wait_for("reaction_add", check=lambda r, u: check(
                     r, u, players[current_player][0], msg, grid), timeout=30)
             except asyncio.TimeoutError:
-                await msg.edit("", embed=nextcord.Embed(title="{} ({}) Wins".format(
+                await msg.edit(content="", embed=discord.Embed(title="{} ({}) Wins".format(
                     players[current_player * -1][0].display_name, players[current_player][2].upper()),
                     description="**{} abandoned the match**\n{}".format(players[current_player][0].display_name,
                                                                         descrip_gen(grid)),
@@ -293,11 +293,11 @@ class Minigames(commands.Cog):
 
             if all([i == emap[players[current_player][2]] or
                     i == emap[players[current_player * -1][2]] for i in grid]):
-                await msg.edit("", embed=nextcord.Embed(title="Tie", description=descrip_gen(grid),
-                    colour=nextcord.Colour.orange()))
+                await msg.edit(content="", embed=discord.Embed(title="Tie", description=descrip_gen(grid),
+                    colour=discord.Colour.orange()))
                 return
             if check_win(grid, emap[players[current_player][2]]):
-                await msg.edit("", embed=nextcord.Embed(title="{} ({}) Wins".format(
+                await msg.edit(content="", embed=discord.Embed(title="{} ({}) Wins".format(
                     players[current_player][0].display_name, players[current_player][2].upper()),
                     description=descrip_gen(grid),
                     colour=players[current_player][1]))
@@ -305,7 +305,7 @@ class Minigames(commands.Cog):
             else:
                 current_player *= -1
                 turn_number += 1
-                await msg.edit("", embed=embed_gen(grid, players, current_player, turn_number,
+                await msg.edit(content="", embed=embed_gen(grid, players, current_player, turn_number,
                                                    players[current_player][1]))
 
     @commands.command(brief="Play a round of Blackjack", aliases=["bj"])
@@ -391,15 +391,15 @@ class Minigames(commands.Cog):
 
         def embed_gen(player, dealer, status):
             if status == "lost":
-                colour = nextcord.Colour.red()
+                colour = discord.Colour.red()
             elif status == "won":
-                colour = nextcord.Colour.green()
+                colour = discord.Colour.green()
             elif status == "tied":
-                colour = nextcord.Colour.gold()
+                colour = discord.Colour.gold()
             else:
                 status = "An Error Has Occured"
-                colour = nextcord.Colour.dark_red()
-            embed = nextcord.Embed(
+                colour = discord.Colour.dark_red()
+            embed = discord.Embed(
                 description="You {}!".format(status),
                 colour=colour
             )
@@ -428,9 +428,9 @@ class Minigames(commands.Cog):
         dealer_hand.append(get_card(deck))
         player_hand.append(get_card(deck))
         player_hand.append(get_card(deck))
-        embed = nextcord.Embed(
+        embed = discord.Embed(
             description="Type `hit` to draw another card or `stand` to pass. If you don't respond for 1 minute, you lose!",
-            colour=nextcord.Colour.blue()
+            colour=discord.Colour.blue()
         )
         embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
                          icon_url=ctx.message.author.display_avatar.url)
@@ -477,9 +477,9 @@ class Minigames(commands.Cog):
             if len(player_hand) >= 7:
                 await message.edit(embed=embed_gen(player_hand, dealer_hand, "won"))
                 return
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 description="Type `hit` to draw another card or `stand` to pass. If you don't respond for 1 minute, you lose!",
-                colour=nextcord.Colour.blue()
+                colour=discord.Colour.blue()
             )
             embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
                              icon_url=ctx.message.author.display_avatar.url)
@@ -511,9 +511,9 @@ class Minigames(commands.Cog):
             if len(dealer_hand) >= 7:
                 await message.edit(embed=embed_gen(player_hand, dealer_hand, "lost"))
                 return
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 description="Dealer is playing!",
-                colour=nextcord.Colour.orange()
+                colour=discord.Colour.orange()
             )
             embed.set_author(name=ctx.message.author.name + '#' + ctx.message.author.discriminator,
                              icon_url=ctx.message.author.display_avatar.url)

@@ -1,8 +1,8 @@
 import itertools
 from re import sub
 
-import nextcord
-from nextcord.ext.commands import Group, HelpCommand
+import discord
+from discord.ext.commands import Group, HelpCommand
 
 from helpers.views import GenericPager, HelpPager
 
@@ -32,7 +32,7 @@ class BotHelp(HelpCommand):
         """Send a help pager"""
         msg = await self.get_destination().send("Processing...")
         view = HelpPager(self.context, msg, 1, self.f, title="Help", ipp=25, description=self.bot_config["description"])
-        await msg.edit(None, embed=view.generate_embed(), view=view)
+        await msg.edit(content=None, embed=view.generate_embed(), view=view)
 
     async def command_callback(self, ctx, *, command=None):
         """Prepare and generate the help command"""
@@ -47,7 +47,7 @@ class BotHelp(HelpCommand):
         if cog is not None:
             return await self.send_cog_help(cog)
 
-        maybe_coro = nextcord.utils.maybe_coroutine
+        maybe_coro = discord.utils.maybe_coroutine
 
         keys = command.split(' ')
         cmd = bot.all_commands.get(keys[0])
@@ -87,9 +87,9 @@ class BotHelp(HelpCommand):
 
     async def send_command_help(self, command):
         usg = "{}{} {}".format(self.context.clean_prefix, command.name, command.usage or "")
-        em = nextcord.Embed(title=usg if len(usg) <= 256 else nextcord.Embed.Empty,
+        em = discord.Embed(title=usg if len(usg) <= 256 else None,
                             description=("`{}`\n\n".format(usg) if len(usg) > 256 else "") + sub(r"(?<!\n)\n(?!\n)", " ", command.help or command.brief or ""),
-                            colour=nextcord.Colour.random())
+                            colour=discord.Colour.random())
         em.add_field(name="Category", value=command.cog_name if command.cog_name is not None else "Uncategorized")
         if len(command.aliases) > 0:
             em.add_field(name="Command Aliases", value=", ".join(["`{}`".format(i) for i in command.aliases]))
@@ -102,7 +102,7 @@ class BotHelp(HelpCommand):
             l.append("{} - {}".format(name, i.brief or "*No command brief*"))
         msg = await self.get_destination().send("Processing...")
         view = GenericPager(self.context, msg, 1, l, ipp=30, line_separator="\n")
-        await msg.edit(None, embed=view.generate_embed(), view=view)
+        await msg.edit(content=None, embed=view.generate_embed(), view=view)
 
     async def send_cog_help(self, cog):
         l = [cog.description + "\n"] if cog.description else []
@@ -111,4 +111,4 @@ class BotHelp(HelpCommand):
             l.append("{} - {}".format(name, i.brief or "*No command brief*"))
         msg = await self.get_destination().send("Processing...")
         view = GenericPager(self.context, msg, 1, l, title=cog.qualified_name, ipp=30, line_separator="\n")
-        await msg.edit(None, embed=view.generate_embed(), view=view)
+        await msg.edit(content=None, embed=view.generate_embed(), view=view)

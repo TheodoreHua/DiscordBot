@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 from helpers.views import GenericPager
 
@@ -17,7 +17,7 @@ class Alias(commands.Cog):
         if name not in self.server_config[str(ctx.guild.id)]["aliases"]:
             return await ctx.send("`{}` is not a valid alias name. Use the `aliases` command to get a list of aliases."
                                   .format(name))
-        em = nextcord.Embed(description=self.server_config[str(ctx.guild.id)]["aliases"][name],
+        em = discord.Embed(description=self.server_config[str(ctx.guild.id)]["aliases"][name],
                             colour=self.bot_config["embed_colour"])
         em.set_author(name="{}alias {}".format(ctx.clean_prefix, name))
         await ctx.send(embed=em)
@@ -33,7 +33,7 @@ class Alias(commands.Cog):
             return await ctx.send("`{}` is already an alias name for this server".format(name))
         self.server_config[str(ctx.guild.id)]["aliases"][name] = message
         self.server_config.write_config()
-        em = nextcord.Embed(description=message, colour=self.bot_config["embed_colour"])
+        em = discord.Embed(description=message, colour=self.bot_config["embed_colour"])
         em.set_author(name="{}alias {}".format(ctx.clean_prefix, name))
         await ctx.send(embed=em)
 
@@ -59,4 +59,4 @@ class Alias(commands.Cog):
         msg = await ctx.send("Processing...")
         view = GenericPager(ctx, msg, 1, aliases, title="Aliases for " + ctx.guild.name, line_separator="\n",
                             timeout=120)
-        await msg.edit(None, embed=view.generate_embed(), view=view)
+        await msg.edit(content=None, embed=view.generate_embed(), view=view)

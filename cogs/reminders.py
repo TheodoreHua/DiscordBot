@@ -4,16 +4,16 @@ import time
 from datetime import timedelta
 from distutils.util import strtobool
 
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 from typed_flags import TypedFlags
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
 
 
 class Reminder:
-    def __init__(self, send_time: float, member: nextcord.Member, message: str, dm: bool, embed_colour: int,
-                 original_message: nextcord.Message, channel: nextcord.TextChannel):
+    def __init__(self, send_time: float, member: discord.Member, message: str, dm: bool, embed_colour: int,
+                 original_message: discord.Message, channel: discord.TextChannel):
         """Create a Reminder object
 
         :param send_time: When the reminder should be sent
@@ -37,7 +37,7 @@ class Reminder:
 
         :param int notify_time: UNIX time in which the reminder was caught and the request to send was initiated
         """
-        em = nextcord.Embed(title="Here's your reminder!", description=self.message, colour=self.embed_colour)
+        em = discord.Embed(title="Here's your reminder!", description=self.message, colour=self.embed_colour)
         em.add_field(name="Reminder ID", value="[{}]({})".format(self.original_message.id,
                                                                  self.original_message.jump_url))
         em.add_field(name="Late By", value=str(timedelta(seconds=notify_time - self.t)))
@@ -128,13 +128,13 @@ class Reminders(commands.Cog):
                      self.bot_config["embed_colour"], ctx.message, ctx.message.channel)
         self.reminders[ctx.message.id] = r
 
-        em = nextcord.Embed(title="I'll remind you in " + str(timedelta(seconds=seconds)), description=r.message,
+        em = discord.Embed(title="I'll remind you in " + str(timedelta(seconds=seconds)), description=r.message,
                             colour=self.bot_config["embed_colour"])
         em.add_field(name="Reminder ID", value="[{}]({})".format(r.original_message.id, r.original_message.jump_url))
         if dm:
             try:
                 await ctx.message.author.send(embed=em)
-            except nextcord.Forbidden:
+            except discord.Forbidden:
                 await ctx.send("You selected the DM option but the bot is unable to send you DMs. Check that you have "
                                "DMs enabled for this server and that the bot isn't blocked.")
                 del self.reminders[ctx.message.id]
@@ -150,7 +150,7 @@ class Reminders(commands.Cog):
         self.user_config.write_config()
 
     @commands.command(brief="Remove a reminder", aliases=["forgetme"])
-    async def removereminder(self, ctx, original_message: nextcord.Message):
+    async def removereminder(self, ctx, original_message: discord.Message):
         """Remove a reminder, to specify which reminder, you have to provide a message URL or ID (the message in which
         you sent the initial reminder request). The ID should be available in the confirmation message, you can also get
         it yourself if you have developer mode on. The URL should be available by using Discord's 'Copy message link'
@@ -163,5 +163,5 @@ class Reminders(commands.Cog):
         del self.user_config["reminders"][str(original_message.id)]
         self.user_config.write_config()
 
-        await ctx.send(embed=nextcord.Embed(title="Reminder removed", description="Reminder ID: [{}]({})".format(
+        await ctx.send(embed=discord.Embed(title="Reminder removed", description="Reminder ID: [{}]({})".format(
             original_message.id, original_message.jump_url), colour=self.bot_config["embed_colour"]))

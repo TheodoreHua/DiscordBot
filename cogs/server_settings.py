@@ -1,4 +1,4 @@
-from nextcord.ext import commands
+from discord.ext import commands
 
 class ServerSettings(commands.Cog, name="Server Settings"):
     def __init__(self, client, bot_config, server_config, user_config):

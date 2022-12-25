@@ -1,4 +1,5 @@
-nextcord[voice]~=2.3.2
+discord.py[voice]
+PyNaCl~=1.5.0
 python-dotenv~=0.14.0
 discord-typed-flags~=1.1.4
 pyparsing~=2.4.7

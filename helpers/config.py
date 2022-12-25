@@ -42,7 +42,7 @@ class ServerConfig:
         """Method to be passed to a commands.Bot instance in order to dynamically generate a prefix per server
 
         :param client: Unused parameter provided by Discord
-        :param nextcord.Message message: Message object associated with the prefix request
+        :param discord.Message message: Message object associated with the prefix request
         :return: Bot prefix for the provided object
         :rtype: str
         """
@@ -53,7 +53,7 @@ class ServerConfig:
     def add_guild(self, guild):
         """Method to add a guild once invited
 
-        :param nextcord.Guild guild: Guild to add
+        :param discord.Guild guild: Guild to add
         """
         self.__config__[str(guild.id)] = self.defaults.copy()
         logging.info("Added guild {} ({}) to guild config".format(guild.name, guild.id))
@@ -61,7 +61,7 @@ class ServerConfig:
     def remove_guild(self, guild):
         """Method to remove a guild once kicked
 
-        :param nextcord.Guild guild: Guild to remove
+        :param discord.Guild guild: Guild to remove
         """
         del self.__config__[str(guild.id)]
         logging.info("Added guild {} ({}) to guild config".format(guild.name, guild.id))

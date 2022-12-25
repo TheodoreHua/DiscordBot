@@ -1,10 +1,10 @@
 from datetime import timedelta
 from math import ceil
 
-import nextcord
+import discord
 
 # noinspection PyUnusedLocal
-class RpsChoice(nextcord.ui.View):
+class RpsChoice(discord.ui.View):
     def __init__(self, expected_uid):
         """Create an RpsChoice view
 
@@ -14,7 +14,7 @@ class RpsChoice(nextcord.ui.View):
         self.choice = None
         self.expected_uid = expected_uid
 
-    async def default_response(self, interaction: nextcord.Interaction, choice):
+    async def default_response(self, interaction: discord.Interaction, choice):
         """Response method called by button's in this class
 
         :param interaction: Interaction associated with button choice
@@ -28,20 +28,20 @@ class RpsChoice(nextcord.ui.View):
         self.choice = choice
         self.stop()
 
-    @nextcord.ui.button(label="Rock", emoji="🪨", style=nextcord.ButtonStyle.grey)
-    async def rock(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="Rock", emoji="🪨", style=discord.ButtonStyle.grey)
+    async def rock(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.default_response(interaction, "Rock")
 
-    @nextcord.ui.button(label="Paper", emoji="📝", style=nextcord.ButtonStyle.grey)
-    async def paper(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="Paper", emoji="📝", style=discord.ButtonStyle.grey)
+    async def paper(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.default_response(interaction, "Paper")
 
-    @nextcord.ui.button(label="Scissors", emoji="✂️", style=nextcord.ButtonStyle.grey)
-    async def scissors(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="Scissors", emoji="✂️", style=discord.ButtonStyle.grey)
+    async def scissors(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.default_response(interaction, "Scissors")
 
 # noinspection PyUnusedLocal
-class AcceptDecline(nextcord.ui.View):
+class AcceptDecline(discord.ui.View):
     def __init__(self, expected_uid, timeout):
         """Create an AcceptDecline view
 
@@ -65,21 +65,21 @@ class AcceptDecline(nextcord.ui.View):
         self.status = accepted
         self.stop()
 
-    @nextcord.ui.button(label="Accept", emoji="✔️", style=nextcord.ButtonStyle.green)
-    async def accept(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="Accept", emoji="✔️", style=discord.ButtonStyle.green)
+    async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.default_response(interaction, True)
 
-    @nextcord.ui.button(label="Decline", emoji="❌", style=nextcord.ButtonStyle.red)
-    async def decline(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="Decline", emoji="❌", style=discord.ButtonStyle.red)
+    async def decline(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.default_response(interaction, False)
 
 
 # noinspection PyUnusedLocal
-class DeleteResponse(nextcord.ui.View):
+class DeleteResponse(discord.ui.View):
     def __init__(self, message, replied_author_id=None, timeout=60):
         """Create a DeleteResponse view, it deletes the provided message when the author clicks the button
 
-        :param nextcord.Message message: Message to delete when the button is clicked
+        :param discord.Message message: Message to delete when the button is clicked
         :param int replied_author_id: User ID of the author in which the response is for, if none any person can delete
         the message
         :param int timeout: Timeout for the button
@@ -93,8 +93,8 @@ class DeleteResponse(nextcord.ui.View):
         self.stop()
         await self.original_message.edit(view=None)
 
-    @nextcord.ui.button(label="Delete", emoji="🗑️", style=nextcord.ButtonStyle.red)
-    async def delete(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="Delete", emoji="🗑️", style=discord.ButtonStyle.red)
+    async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.replied_author_id is None or self.replied_author_id == interaction.user.id:
             await self.original_message.delete()
             await interaction.response.send_message("Message deleted.", ephemeral=True)
@@ -104,13 +104,13 @@ class DeleteResponse(nextcord.ui.View):
 
 
 # noinspection PyUnusedLocal
-class GenericPager(nextcord.ui.View):
+class GenericPager(discord.ui.View):
     def __init__(self, ctx, original_message, page, entries, last_page=None, title=None, line_separator="\n\n", ipp=10,
                  timeout=300):
         """Create a GenericPager view
 
         :param ctx: Context associated with the view
-        :param nextcord.Message original_message: The message the bot sent with the view (and embed)
+        :param discord.Message original_message: The message the bot sent with the view (and embed)
         :param int page: Default starting page number
         :param list entries: Entries to be paginated
         :param int last_page: Last page number
@@ -138,16 +138,16 @@ class GenericPager(nextcord.ui.View):
         """Generate the embed for a certain page
 
         :return: Generated webhook for the current page
-        :rtype: nextcord.Embed
+        :rtype: discord.Embed
         """
         si = (self.page - 1) * self.ipp
-        em = nextcord.Embed(title=self.title, description=self.line_separator.join(self.entries[si:si + self.ipp]),
-                            colour=nextcord.Colour.random())
+        em = discord.Embed(title=self.title, description=self.line_separator.join(self.entries[si:si + self.ipp]),
+                            colour=discord.Colour.random())
         em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
                       icon_url=self.ctx.author.display_avatar.url)
         return em
 
-    async def resp(self, interaction: nextcord.Interaction, new_page):
+    async def resp(self, interaction: discord.Interaction, new_page):
         """Response method called by button's in this class
 
         :param interaction: Interaction associated with the button press
@@ -162,32 +162,32 @@ class GenericPager(nextcord.ui.View):
 
         await self.original_message.edit(embed=self.generate_embed())
 
-    @nextcord.ui.button(label="<<", style=nextcord.ButtonStyle.blurple)
-    async def first(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="<<", style=discord.ButtonStyle.blurple)
+    async def first(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.resp(interaction, 1)
 
-    @nextcord.ui.button(label="<", style=nextcord.ButtonStyle.blurple)
-    async def before(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="<", style=discord.ButtonStyle.blurple)
+    async def before(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.resp(interaction, self.page - 1)
 
-    @nextcord.ui.button(label="Stop Command", emoji="🛑", style=nextcord.ButtonStyle.red)
-    async def cancel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label="Stop Command", emoji="🛑", style=discord.ButtonStyle.red)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.stop()
         await self.original_message.edit(view=None)
 
-    @nextcord.ui.button(label=">", style=nextcord.ButtonStyle.blurple)
-    async def after(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label=">", style=discord.ButtonStyle.blurple)
+    async def after(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.resp(interaction, self.page + 1)
 
-    @nextcord.ui.button(label=">>", style=nextcord.ButtonStyle.blurple)
-    async def last(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
+    @discord.ui.button(label=">>", style=discord.ButtonStyle.blurple)
+    async def last(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self.resp(interaction, self.last_page)
 
 
 class IndividualPager(GenericPager):
     def generate_embed(self):
-        em = nextcord.Embed(title=self.title, description=self.entries[self.page - 1],
-                            colour=nextcord.Colour.random())
+        em = discord.Embed(title=self.title, description=self.entries[self.page - 1],
+                            colour=discord.Colour.random())
         em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
                       icon_url=self.ctx.author.display_avatar.url)
         return em
@@ -203,7 +203,7 @@ class MusicQueuePager(GenericPager):
         :param list pages: Pages to go through
         :param current_song: Current song at time of generation
         :param ctx: Context associated with the view
-        :param nextcord.Message msg: Original message containing the view and embed
+        :param discord.Message msg: Original message containing the view and embed
         :param int total_duration: Total duration of all songs in the queue in seconds
         """
         super().__init__(ctx, msg, page, pages, last_page=last_page)
@@ -216,7 +216,7 @@ class MusicQueuePager(GenericPager):
         """Generate the embed for a queue page
 
         :return: Generated webhook for the current page
-        :rtype: nextcord.Embed
+        :rtype: discord.Embed
         """
         desc = "**Current Song: ** [{}]({}) | `{}`\n\n".format(
             self.current_song.title, self.current_song.url, str(timedelta(seconds=self.current_song.duration))
@@ -228,8 +228,8 @@ class MusicQueuePager(GenericPager):
                 str(timedelta(seconds=s.get('duration'))))
         desc += "**{:,} songs in queue | {} total length**".format(len(self.pages),
                                                                    str(timedelta(seconds=self.total_duration)))
-        em = nextcord.Embed(title="Queue for " + self.ctx.guild.name,
-                            description=desc, colour=nextcord.Colour.random())
+        em = discord.Embed(title="Queue for " + self.ctx.guild.name,
+                            description=desc, colour=discord.Colour.random())
         em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
                       icon_url=self.ctx.author.display_avatar.url)
 
@@ -256,7 +256,7 @@ class HelpPager(GenericPager):
         """Create a GenericPager view
 
         :param ctx: Context associated with the view
-        :param nextcord.Message original_message: The message the bot sent with the view (and embed)
+        :param discord.Message original_message: The message the bot sent with the view (and embed)
         :param int page: Default starting page number
         :param list entries: Entries to be paginated
         :param int last_page: Last page number
@@ -272,7 +272,7 @@ class HelpPager(GenericPager):
     def generate_embed(self):
         si = (self.page - 1) * 25
         fs = sorted(self.entries)[si:si + 25]
-        em = nextcord.Embed(title=self.title, description=self.description, colour=nextcord.Colour.random())
+        em = discord.Embed(title=self.title, description=self.description, colour=discord.Colour.random())
         em.set_footer(text="Page {:,}/{:,}".format(self.page, self.last_page),
                       icon_url=self.ctx.author.display_avatar.url)
         for n in fs:

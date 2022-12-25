@@ -1,4 +1,4 @@
-import nextcord
+import discord
 
 def cut_mentions(objs, max_length) -> str:
     """Cut a list of mentionable objects to a certain length
@@ -19,13 +19,13 @@ def cut_mentions(objs, max_length) -> str:
 def add_fields(embed, fields):
     """Add fields from a dict to an embed
 
-    :param nextcord.Embed embed:
+    :param discord.Embed embed:
     :param dict fields:
     """
     for n, v in fields.items():
         embed.add_field(name=n, value=v)
 
-async def get_webhook(ctx, client) -> nextcord.Webhook:
+async def get_webhook(ctx, client) -> discord.Webhook:
     """
 
     :param ctx: The context you're looking for a webhook in

@@ -3,10 +3,10 @@ import random
 from datetime import timedelta
 from math import ceil
 
-import nextcord
+import discord
 import yt_dlp
 from async_timeout import timeout
-from nextcord.ext import commands
+from discord.ext import commands
 
 from helpers.views import MusicQueuePager
 
@@ -20,8 +20,8 @@ class YTDLError(Exception):
     pass
 
 
-class YTDLSource(nextcord.PCMVolumeTransformer):
-    def __init__(self, channel, source: nextcord.FFmpegPCMAudio, *, data: dict, volume: float):
+class YTDLSource(discord.PCMVolumeTransformer):
+    def __init__(self, channel, source: discord.FFmpegPCMAudio, *, data: dict, volume: float):
         super().__init__(source, volume)
         self.channel = channel
         self.data = data
@@ -34,7 +34,7 @@ class YTDLSource(nextcord.PCMVolumeTransformer):
 
     @classmethod
     def create_source_from_data(cls, channel, data, volume=0.5):
-        return cls(channel, nextcord.FFmpegPCMAudio(data['url'], **{
+        return cls(channel, discord.FFmpegPCMAudio(data['url'], **{
             'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-dn -vn'}),
                    data=data, volume=volume)
 
@@ -209,7 +209,7 @@ class Music(commands.Cog):
             for i in p['entries']:
                 await player.queue.put(i)
                 c += 1
-            em = nextcord.Embed(description="[{}]({})".format(p['title'], p['webpage_url']),
+            em = discord.Embed(description="[{}]({})".format(p['title'], p['webpage_url']),
                                 colour=self.bot_config["embed_colour"])
             em.set_author(icon_url=ctx.author.avatar.url, name="Playlist added to queue")
             em.add_field(name="Playlist Author", value=p['uploader'])
@@ -411,7 +411,7 @@ class Music(commands.Cog):
         if player.current_song is None:
             return await ctx.send("I'm not currently playing anything")
         s = player.current_song
-        em = nextcord.Embed(description="[{}]({})".format(s.title, s.url), colour=self.bot_config["embed_colour"])
+        em = discord.Embed(description="[{}]({})".format(s.title, s.url), colour=self.bot_config["embed_colour"])
         em.set_author(icon_url=self.client.user.display_avatar.url, name="Now Playing")
         em.set_thumbnail(url=s.thumbnail)
         em.add_field(name="Duration", value=str(timedelta(seconds=s.duration)))
@@ -435,4 +435,4 @@ class Music(commands.Cog):
         last_page, total_duration = ceil(len(pages) / 10), player.get_total_duration()
         msg = await ctx.send("**Processing...**")
         view = MusicQueuePager(1, last_page, pages, player.current_song, ctx, msg, total_duration)
-        await msg.edit("", embed=view.generate_embed(), view=view)
+        await msg.edit(content="", embed=view.generate_embed(), view=view)

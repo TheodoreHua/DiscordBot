@@ -6,9 +6,9 @@ from datetime import datetime
 from difflib import SequenceMatcher
 
 import dateparser
-import nextcord
+import discord
 import requests
-from nextcord.ext import commands
+from discord.ext import commands
 from typed_flags import TypedFlags
 
 from helpers.funcs import cut_mentions, add_fields, get_webhook
@@ -41,7 +41,7 @@ class Utility(commands.Cog):
                 msg.mentions = [i for i in msg.mentions if i.id != msg.author.id]
             if len(msg.mentions) == 1:
                 if str(msg.mentions[0].id) in self.server_config[str(msg.guild.id)]["nopings"]:
-                    rep = await msg.reply(embed=nextcord.Embed(
+                    rep = await msg.reply(embed=discord.Embed(
                             title="Please do not ping " + msg.mentions[0].display_name,
                             description="This user has requested that the following message be sent when people ping "
                                         "them:\n" + "\n".join(["> {}".format(i) for i in self.server_config
@@ -50,7 +50,7 @@ class Utility(commands.Cog):
                     v = DeleteResponse(rep, msg.author.id)
                     await rep.edit(view=v)
             elif 1 < len(msg.mentions) <= 25:
-                em = nextcord.Embed(title="Do not ping these users",
+                em = discord.Embed(title="Do not ping these users",
                                     description="These users have requested not to be pinged, below is a list of these "
                                                 "users, and a custom message supplied by them to go "
                                                 "along with it.", colour=self.bot_config["embed_colour"])
@@ -66,11 +66,11 @@ class Utility(commands.Cog):
                     await rep.edit(view=v)
 
     @commands.command(aliases=["pfp"], brief="Get a user's profile picture")
-    async def avatar(self, ctx, user: nextcord.User = None):
+    async def avatar(self, ctx, user: discord.User = None):
         """Get a user's profile picture, or run the command by itself for your own profile picture."""
         if user is None:
             user = ctx.message.author
-        em = nextcord.Embed(description=user.mention + "'s Avatar", colour=self.bot_config["embed_colour"])
+        em = discord.Embed(description=user.mention + "'s Avatar", colour=self.bot_config["embed_colour"])
         em.set_image(url=user.display_avatar.url)
 
         await ctx.send(embed=em)
@@ -115,7 +115,7 @@ class Utility(commands.Cog):
                                                                                   g.member_count)
         }
 
-        em = nextcord.Embed(title=g.name, description=g.description, colour=self.bot_config["embed_colour"])
+        em = discord.Embed(title=g.name, description=g.description, colour=self.bot_config["embed_colour"])
         em.set_author(name="Server Owner: {}".format(str(g.owner)),
                       icon_url=g.owner.display_avatar.url)
         if g.icon is not None:
@@ -130,10 +130,10 @@ class Utility(commands.Cog):
         await ctx.send(embed=em)
 
     @commands.command(brief="Show info about a user")
-    async def userinfo(self, ctx, user: nextcord.User):
+    async def userinfo(self, ctx, user: discord.User):
         """Show general info about a user (doesn't have to be in the server). To see info specific to this server use
         memberinfo"""
-        em = nextcord.Embed(colour=self.bot_config["embed_colour"])
+        em = discord.Embed(colour=self.bot_config["embed_colour"])
         em.set_thumbnail(url=user.display_avatar.url)
         em.set_author(name=str(user), icon_url=user.display_avatar.url)
         em.add_field(name="ID", value=str(user.id))
@@ -144,9 +144,9 @@ class Utility(commands.Cog):
 
     @commands.command(brief="Show info about a member")
     @commands.guild_only()
-    async def memberinfo(self, ctx, member: nextcord.Member):
+    async def memberinfo(self, ctx, member: discord.Member):
         """Show info about a member, specific to this server"""
-        em = nextcord.Embed(description=member.mention, colour=self.bot_config["embed_colour"])
+        em = discord.Embed(description=member.mention, colour=self.bot_config["embed_colour"])
         em.set_thumbnail(url=member.display_avatar.url)
         em.set_author(name=str(member), icon_url=member.display_avatar.url)
         fields = {
@@ -176,9 +176,9 @@ class Utility(commands.Cog):
 
     @commands.command(brief="Show info about a role")
     @commands.guild_only()
-    async def roleinfo(self, ctx, role: nextcord.Role):
+    async def roleinfo(self, ctx, role: discord.Role):
         """Show info about a role in the server"""
-        em = nextcord.Embed(description=role.mention, colour=self.bot_config["embed_colour"])
+        em = discord.Embed(description=role.mention, colour=self.bot_config["embed_colour"])
         fields = {
             "Role Name": role.name,
             "Role ID": str(role.id),
@@ -224,7 +224,7 @@ class Utility(commands.Cog):
 
     @commands.command(brief="Send a message as another user (to impersonate them)", usage="<user> <message>")
     @commands.guild_only()
-    async def impersonate(self, ctx, user: typing.Union[nextcord.Member, nextcord.User], *, message):
+    async def impersonate(self, ctx, user: typing.Union[discord.Member, discord.User], *, message):
         """Impersonate another user with the power of webhooks! Basically this allows you to send a message with another
          user's profile picture and name, note that the role colour WILL be white and there'll be a bot tag, there's
           nothing I can do about that as it's just how it works."""
@@ -290,7 +290,7 @@ class Utility(commands.Cog):
             else:
                 await ctx.send("It seems like the Mojang API is currently broken, try again later?")
             return
-        e = nextcord.Embed(title=username, description="**Username History:**\n" +
+        e = discord.Embed(title=username, description="**Username History:**\n" +
                                                        "\n".join(["- " + i["name"] for i in reversed(history)]),
                            colour=self.bot_config["embed_colour"])
         e.set_thumbnail(url="https://crafatar.com/avatars/{}?overlay".format(uuid))
@@ -301,14 +301,14 @@ class Utility(commands.Cog):
 
     @commands.command(brief="Send longer messages", aliases=["combinemessage", "cm"])
     @commands.guild_only()
-    async def messagecombine(self, ctx, msg1: nextcord.Message, msg2: nextcord.Message, delete_originals: bool = False):
+    async def messagecombine(self, ctx, msg1: discord.Message, msg2: discord.Message, delete_originals: bool = False):
         """Combine two existing 2000 character messages into one 4000 character message. By default the original 2
         messages are not deleted, you can pass an extra bool value to delete them."""
         await ctx.message.delete()
         new_message = msg1.content + "\n" + msg2.content
         if len(new_message) > 4096:
             return await ctx.send("New message too long", delete_after=15)
-        em = nextcord.Embed(description=new_message)
+        em = discord.Embed(description=new_message)
         em.set_author(name=str(ctx.author), icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=em)
 
@@ -324,7 +324,7 @@ class Utility(commands.Cog):
         your text as the description in an embed, so you can use any other formatting embeds have. If you want a more
         advanced command, try the `embedgen` command."""
         await ctx.message.delete()
-        em = nextcord.Embed(description=message)
+        em = discord.Embed(description=message)
         em.set_author(name=str(ctx.author), icon_url=ctx.author.display_avatar.url)
 
         await ctx.send(embed=em)
@@ -349,7 +349,7 @@ class Utility(commands.Cog):
                          'thumbnail', 'author_name', 'author_icon_url', 'author_url']
         try:
             e = None
-            em = nextcord.Embed(title=args.get('title', e), description=args.get('description', e),
+            em = discord.Embed(title=args.get('title', e), description=args.get('description', e),
                                 colour=int(args.get('colour')) if 'colour' in args else e,
                                 url=args.get('url', e))
             if "footer_text" in args:
@@ -378,7 +378,7 @@ class Utility(commands.Cog):
                 c += 1
         except ValueError:
             return await ctx.send("Some conversion failed, likely due to an invalid value", delete_after=15)
-        except nextcord.HTTPException:
+        except discord.HTTPException:
             return await ctx.send("Invalid value in embed, couldn't send it", delete_after=15)
         webhook = await get_webhook(ctx, self.client)
         await webhook.send(embed=em, username=ctx.author.display_name, avatar_url=ctx.author.display_avatar.url)
@@ -401,7 +401,7 @@ class Utility(commands.Cog):
             if len(results) == 0:
                 return await ctx.send("No results found")
             elif len(results) == 1:
-                em = nextcord.Embed(title=results[0]["word"], description=results[0]["definition"],
+                em = discord.Embed(title=results[0]["word"], description=results[0]["definition"],
                                     colour=self.bot_config["embed_colour"])
                 em.set_author(name=results[0]["author"])
                 em.add_field(name="Example", value=results[0]["example"], inline=False)
@@ -415,7 +415,7 @@ class Utility(commands.Cog):
                     "**Word**: [{}]({})\n**Author**: `{}`\n\n{}".format(i["word"], i["permalink"], i["author"],
                                                                         i["definition"]) for i in results],
                                     last_page=len(results), title=term, timeout=120)
-                await msg.edit(None, embed=v.generate_embed(), view=v)
+                await msg.edit(content=None, embed=v.generate_embed(), view=v)
 
     @commands.command(aliases=["paste", "pastebin", "haste", "uploadtext"], brief="Upload text to hastebin",
                       usage="<text>")

@@ -4,8 +4,8 @@ import json
 import sys
 
 import requests
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(message)s'")
 
@@ -22,8 +22,8 @@ class BotOwner(commands.Cog):
     async def setstatus(self, ctx, *, status):
         if ctx.guild is not None:
             await ctx.message.delete()
-        await self.client.change_presence(status=nextcord.Status.online,
-                                          activity=nextcord.Game(status if status != "reset"
+        await self.client.change_presence(status=discord.Status.online,
+                                          activity=discord.Game(status if status != "reset"
                                                                  else self.bot_config["status"]))
         await ctx.send("Bot's status set to `{}` until reset".format(status) if status != "reset" else
                        "Bot's status reset", delete_after=5)

@@ -4,8 +4,9 @@ from difflib import SequenceMatcher
 from os import environ, getenv
 from traceback import format_tb
 
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord import app_commands
+from discord.ext import commands
 from dotenv import load_dotenv
 
 from cogs import cogs
@@ -17,22 +18,20 @@ logging.basicConfig(level=logging.INFO, format="[%(levelname)s] (%(name)s): %(me
 assert_data()
 bot_config, user_config = BotConfig(), UserConfig()
 server_config = ServerConfig(bot_config)
-intents = nextcord.Intents.all()
-allowed_mentions = nextcord.AllowedMentions(everyone=False, replied_user=False)
+intents = discord.Intents.all()
+allowed_mentions = discord.AllowedMentions(everyone=False, replied_user=False)
 client = commands.Bot(command_prefix=server_config.get_prefix, intents=intents,
                       owner_id=bot_config["owner_id"], description=bot_config["description"],
                       allowed_mentions=allowed_mentions, help_command=BotHelp(bot_config))
 
-for cog in cogs:
-    client.add_cog(cog(client, bot_config, server_config, user_config))
-    logging.info("Initialized cog " + cog.__name__)
-
-
 @client.event
 async def on_ready():
+    for cog in cogs:
+        await client.add_cog(cog(client, bot_config, server_config, user_config))
+        logging.info("Initialized cog " + cog.__name__)
     user_config.check_values()
     server_config.check_servers(client.guilds)
-    await client.change_presence(status=nextcord.Status.online, activity=nextcord.Game(bot_config["status"]))
+    await client.change_presence(status=discord.Status.online, activity=discord.Game(bot_config["status"]))
     print("Bot has been initiated")
 
 
@@ -94,12 +93,12 @@ async def on_command_error(ctx, error):
                 ctx.invoked_with, ctx.author.id, repr(error), "\n".join(format_tb(error.__traceback__))) +
             ("{}\n{}".format(repr(error.__cause__), "\n".join(format_tb(error.__cause__.__traceback__)))
              if error.__cause__ is not None else ""))
-        await ctx.send(embed=nextcord.Embed(
-            description=":x: An internal exception occurred while running this command.", colour=nextcord.Colour.red()))
+        await ctx.send(embed=discord.Embed(
+            description=":x: An internal exception occurred while running this command.", colour=discord.Colour.red()))
 
 
-@client.slash_command()
-async def ping(interaction: nextcord.Interaction):
+@client.tree.command(name="ping", description="Pong!")
+async def ping(interaction: discord.Interaction):
     await interaction.response.send_message("Pong! `{:,.4f}ms`".format(client.latency * 1000))
 
 
