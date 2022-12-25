@@ -86,7 +86,10 @@ class Player:
             self.ctx.voice_client.play(s, after=lambda _: self.client.loop.call_soon_threadsafe(self.next.set))
             await self.next.wait()
 
-            s.cleanup()
+            try:
+                s.cleanup()
+            except ValueError:
+                pass
             self.current_song = None
             self.skips = []
             if len([i for i in self.ctx.guild.get_member(self.client.user.id).voice.channel.members if not i.bot]) == 0:
