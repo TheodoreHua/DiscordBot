@@ -27,6 +27,7 @@ class RpsChoice(discord.ui.View):
             return
         self.choice = choice
         self.stop()
+        await interaction.response.defer()
 
     @discord.ui.button(label="Rock", emoji="🪨", style=discord.ButtonStyle.grey)
     async def rock(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -64,6 +65,7 @@ class AcceptDecline(discord.ui.View):
             return
         self.status = accepted
         self.stop()
+        await interaction.response.defer()
 
     @discord.ui.button(label="Accept", emoji="✔️", style=discord.ButtonStyle.green)
     async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -95,7 +97,7 @@ class DeleteResponse(discord.ui.View):
 
     @discord.ui.button(label="Delete", emoji="🗑️", style=discord.ButtonStyle.red)
     async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.replied_author_id is None or self.replied_author_id == interaction.user.id:
+        if self.replied_author_id is None or self.replied_author_id == interaction.user.id or interaction.user.guild_permissions.manage_messages:
             await self.original_message.delete()
             await interaction.response.send_message("Message deleted.", ephemeral=True)
         else:
@@ -161,6 +163,7 @@ class GenericPager(discord.ui.View):
         self.page = new_page
 
         await self.original_message.edit(embed=self.generate_embed())
+        await interaction.response.defer()
 
     @discord.ui.button(label="<<", style=discord.ButtonStyle.blurple)
     async def first(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -249,6 +252,7 @@ class MusicQueuePager(GenericPager):
         self.page = new_page
 
         await self.msg.edit(embed=self.generate_embed())
+        await interaction.response.defer()
 
 class HelpPager(GenericPager):
     def __init__(self, ctx, original_message, page, entries, last_page=None, title=None, line_separator="\n\n", ipp=10,
