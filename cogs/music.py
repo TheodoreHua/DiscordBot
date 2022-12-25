@@ -78,8 +78,12 @@ class Player:
                 data = self.force_play
                 self.force_play = None
 
-            data = await asyncio.get_event_loop().run_in_executor(None, lambda: ytdl.extract_info(
-                data.get('webpage_url') or data.get('url'), download=False))
+            try:
+                data = await asyncio.get_event_loop().run_in_executor(None, lambda: ytdl.extract_info(
+                    data.get('webpage_url') or data.get('url'), download=False))
+            except yt_dlp.utils.DownloadError:
+                await self.text_channel.send(":x: An error has occurred playing `{}`".format(data.get('title', 'Unknown Song')))
+                continue
             s = YTDLSource.create_source_from_data(self.text_channel, data, self.volume)
             self.current_song = s
 
