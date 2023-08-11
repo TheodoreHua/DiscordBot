@@ -289,7 +289,7 @@ class Utility(commands.Cog):
             else:
                 await ctx.send("It seems like the username history API is currently broken, try again later?")
             return
-        e = discord.Embed(title=username, description="**Username History:**\n" +
+        e = discord.Embed(title=username, description="**Username History:** (up to 2022-09-15)\n" +
                                                        "\n".join(["- " + i["name"] for i in reversed(history)]),
                            colour=self.bot_config["embed_colour"])
         e.set_thumbnail(url="https://crafatar.com/avatars/{}?overlay".format(uuid))
