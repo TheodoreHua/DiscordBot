@@ -280,15 +280,14 @@ class Utility(commands.Cog):
                 await ctx.send("It seems like the Mojang API is currently broken, try again later?")
             return
 
-        rhistory = requests.get("https://api.mojang.com/user/profiles/{}/names".format(uuid))
-        if rhistory.ok and rhistory.status_code not in [204, 400]:
+        rhistory = requests.get("https://laby.net/api/user/{}/get-names".format(uuid))
+        if rhistory.ok and rhistory.status_code not in [204, 400, 403]:
             history = rhistory.json()
         else:
-            if rhistory.status_code in [204, 400]:
-                await ctx.send("I can't seem to find that Minecraft user on Mojang servers, is it a non-paid MC"
-                               "account?")
+            if rhistory.status_code in [204, 400, 403]:
+                await ctx.send("I can't seem to find that player, is it a non-paid MC account?")
             else:
-                await ctx.send("It seems like the Mojang API is currently broken, try again later?")
+                await ctx.send("It seems like the username history API is currently broken, try again later?")
             return
         e = discord.Embed(title=username, description="**Username History:**\n" +
                                                        "\n".join(["- " + i["name"] for i in reversed(history)]),
