@@ -280,7 +280,7 @@ class Utility(commands.Cog):
                 await ctx.send("It seems like the Mojang API is currently broken, try again later?")
             return
 
-        rhistory = requests.get("https://laby.net/api/user/{}/get-names".format(uuid))
+        rhistory = requests.get("https://laby.net/api/user/{}/get-names".format(uuid), headers={"User-Agent": ""})
         if rhistory.ok and rhistory.status_code not in [204, 400, 403]:
             history = rhistory.json()
         else:
